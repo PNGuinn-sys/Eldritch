@@ -40,3 +40,9 @@ threat:
   hide_text: >-
     You go still in the dark and let the fog do the rest. After a long
     moment, the shambling sound fades back toward the water.
+
+# Hand-tuned at its current size: pinned so game/balance.py auto-scaling
+# leaves it exactly as authored. Delete both lines (or change them) after
+# extending this scenario to let it auto-scale instead.
+dread_scale: 1.0
+sanity_scale: 1.0

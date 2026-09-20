@@ -31,6 +31,17 @@ intro: >-                          # optional - shown once, before the first roo
 #   uneasy: 0.50
 #   fraying: 0.25
 
+# --- Auto-balancing (game/balance.py) ---
+#
+# By default the engine scales dread frequency (by room count) and every
+# on_take_sanity / sanity_effect (by how many such things exist) against
+# a 7-room / 8-cost baseline, so longer scenarios don't get harsher just
+# for being longer. Small scenarios scale UP (this 2-room template runs
+# at the 2.5x cap) - set these to 1.0 for exactly the numbers you wrote.
+#
+# dread_scale: 1.0         # override auto dread scaling (1.0 = as authored)
+# sanity_scale: 1.0        # override auto sanity-cost scaling
+
 # --- Re-skinning the stalking presence ---
 #
 # Every scenario shares the same underlying mechanic (dread quietly

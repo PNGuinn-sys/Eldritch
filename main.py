@@ -384,7 +384,7 @@ def handle_command(cmd, player: Player, rooms: dict, events: list, rng, scenario
     if cmd.verb in TURN_CONSUMING_VERBS and not player.presence_active and not just_evaded:
         current_room = rooms[player.location]  # re-fetch: 'go' may have just moved the player
         if not current_room.get("safe"):
-            risk_multiplier = current_room.get("risk_multiplier", 1.0)
+            risk_multiplier = current_room.get("risk_multiplier", 1.0) * scenario.dread_scale
             if advance_dread(player, rng, scenario.threat, risk_multiplier):
                 print(scenario.threat.get("manifest_text") or DEFAULT_PRESENCE_MANIFEST_TEXT)
 

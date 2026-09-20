@@ -15,3 +15,9 @@ clues_required: 6
 intro: >-
   You don't remember agreeing to come here. You remember only that the
   invitation felt impossible to refuse.
+
+# Hand-tuned at its current size: pinned so game/balance.py auto-scaling
+# leaves it exactly as authored. Delete both lines (or change them) after
+# extending this scenario to let it auto-scale instead.
+dread_scale: 1.0
+sanity_scale: 1.0

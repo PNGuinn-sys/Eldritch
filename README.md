@@ -81,6 +81,20 @@ that's out of balance.
 - `sanity_tier_thresholds` — override where Lucid/Uneasy/Fraying begin
   (as a % of `max_sanity`; Broken is always the floor).
 
+**Auto-balancing** (`game/balance.py`) — so a longer scenario doesn't
+end up harsher just for being longer, two multipliers are computed
+automatically at load time, relative to a 7-room / 8-sanity-cost
+baseline: `dread_scale` (per-turn chance the presence advances; more
+rooms means more turns, so it drops) and `sanity_scale` (applied to every
+`on_take_sanity` / `sanity_effect`; more costly content means each cost
+shrinks). Restoratives (`on_use_sanity`) and `rest_amount` are never
+scaled. Both are clamped to 0.35-2.5, and note it works in both
+directions: a *small* scenario is scaled up (a 2-room one gets the full
+2.5x). Set either in `manifest.yaml` to override; `1.0` means "exactly
+as authored". Manor, Hollow Tide and The Reagent were hand-tuned and are
+pinned to `1.0` — delete those lines after extending one to let it
+auto-scale.
+
 **Recovery** — a room with `safe: true` can be rested in (`rest`/`recover`,
 restores `rest_amount`, default 15); an item with `on_use_sanity` is a
 rare, single-use restorative via `use <item>`.
@@ -158,7 +172,7 @@ eldritch/
 │   ├── sanity.py               # Sanity tiers & narration distortion
 │   ├── entities.py              # The stalking presence (dread system)
 │   ├── world.py                  # Resolves a scenario's templates into one playthrough
-│   ├── balance.py                 # Auto-scaling helpers for dread/sanity (written, not yet wired in)
+│   ├── balance.py                 # Auto-scales dread frequency & sanity costs to scenario size
 │   └── rng.py                     # Seeded RNG for reproducible randomness
 ├── data/                  # Adventure content lives here, not in code
 │   ├── manor/                # Scenario 1: "The Manor"

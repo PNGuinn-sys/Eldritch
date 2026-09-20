@@ -18,6 +18,7 @@ from typing import Dict, List, Optional
 
 import yaml
 
+from game.balance import compute_dread_scale, compute_sanity_scale, count_sanity_affecting_units
 from game.entities import DEFAULT_CHANCE_BY_TIER, DREAD_THRESHOLD
 
 VALID_TIER_KEYS = {"lucid", "uneasy", "fraying", "broken"}
@@ -76,6 +77,41 @@ class Scenario:
     sanity_tier_thresholds: Optional[dict] = None
     win_text: Optional[str] = None
     broken_text: Optional[str] = None
+    # Resolved at load time (manifest override, else auto-computed from
+    # scenario size - see game/balance.py). 1.0 means "as authored".
+    dread_scale: float = 1.0
+    sanity_scale: float = 1.0
+
+
+def _scale_amount(value, scale: float):
+    """Scale an authored sanity amount, keeping its sign and never letting
+    a nonzero cost round away to nothing."""
+    scaled = round(value * scale)
+    if scaled == 0 and value != 0:
+        return 1 if value > 0 else -1
+    return scaled
+
+
+def _apply_sanity_scale(items: dict, events: list, scale: float):
+    """Return (items, events) with every on_take_sanity / sanity_effect
+    scaled. Copies - the loaded YAML dicts are left untouched. Restorative
+    on_use_sanity values are deliberately NOT scaled: scaling costs down
+    while shrinking recovery too would just be a second difficulty knob."""
+    if scale == 1.0:
+        return items, events
+    new_items = {}
+    for item_id, template in items.items():
+        template = dict(template)
+        if template.get("on_take_sanity"):
+            template["on_take_sanity"] = _scale_amount(template["on_take_sanity"], scale)
+        new_items[item_id] = template
+    new_events = []
+    for event in events:
+        event = dict(event)
+        if event.get("sanity_effect"):
+            event["sanity_effect"] = _scale_amount(event["sanity_effect"], scale)
+        new_events.append(event)
+    return new_items, new_events
 
 
 def load_scenario(data_dir: Path) -> Scenario:
@@ -105,6 +141,14 @@ def load_scenario(data_dir: Path) -> Scenario:
         "hide_text": manifest_threat.get("hide_text"),
     }
 
+    dread_scale = manifest.get("dread_scale")
+    if dread_scale is None:
+        dread_scale = compute_dread_scale(len(rooms))
+    sanity_scale = manifest.get("sanity_scale")
+    if sanity_scale is None:
+        sanity_scale = compute_sanity_scale(count_sanity_affecting_units(items, events))
+    items, events = _apply_sanity_scale(items, events, sanity_scale)
+
     scenario = Scenario(
         name=data_dir.name,
         title=manifest.get("title", data_dir.name),
@@ -120,6 +164,8 @@ def load_scenario(data_dir: Path) -> Scenario:
         sanity_tier_thresholds=manifest.get("sanity_tier_thresholds"),
         win_text=manifest.get("win_text"),
         broken_text=manifest.get("broken_text"),
+        dread_scale=dread_scale,
+        sanity_scale=sanity_scale,
     )
 
     errors = validate_scenario(scenario)
@@ -264,6 +310,11 @@ def validate_scenario(scenario: Scenario) -> List[str]:
                 f"clues_required ({scenario.clues_required}) is greater than "
                 f"the total number of is_clue items ({total_clues})"
             )
+
+    for key in ("dread_scale", "sanity_scale"):
+        value = getattr(scenario, key)
+        if not isinstance(value, (int, float)) or isinstance(value, bool) or value <= 0:
+            errors.append(f"{key} must be a positive number, got {value!r}")
 
     if scenario.max_sanity is not None and scenario.max_sanity <= 0:
         errors.append(f"max_sanity must be a positive integer, got {scenario.max_sanity}")

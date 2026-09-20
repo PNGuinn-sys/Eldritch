@@ -887,6 +887,113 @@ def test_sanity_reaching_zero_ends_game():
     assert player.sanity == 0
 
 
+# --- Auto-balancing (game/balance.py) ---------------------------------------------
+
+def _write_scenario(tmp, manifest_extra="", room_count=14, cost=-10):
+    """Write a throwaway scenario: a chain of rooms, one clue, one costly
+    item, one costly event. Returns its directory."""
+    import yaml
+    tmp.mkdir(parents=True, exist_ok=True)
+    rooms = {}
+    for i in range(room_count):
+        exits = {}
+        if i + 1 < room_count:
+            exits["north"] = {"target": f"r{i + 1}"}
+        if i > 0:
+            exits["south"] = {"target": f"r{i - 1}"}
+        if i == 0:
+            exits["out"] = {"requires_all_clues": True, "locked_text": "no"}
+        rooms[f"r{i}"] = {"name": f"Room {i}", "description_variants": ["x"], "exits": exits}
+    items = {
+        "clue": {"name": "clue", "valid_rooms": ["r0"], "is_clue": True},
+        "cursed": {"name": "cursed thing", "valid_rooms": ["r0"], "on_take_sanity": cost},
+        "tonic": {"name": "tonic", "valid_rooms": ["r0"], "on_use_sanity": 20},
+    }
+    events = [
+        {"id": f"e{i}", "rooms": ["r0"], "chance": 0.5, "text": "t", "sanity_effect": cost}
+        for i in range(10)
+    ]
+    (tmp / "manifest.yaml").write_text("title: T\nstart_room: r0\n" + manifest_extra, encoding="utf-8")
+    (tmp / "rooms.yaml").write_text(yaml.safe_dump(rooms), encoding="utf-8")
+    (tmp / "items.yaml").write_text(yaml.safe_dump(items), encoding="utf-8")
+    (tmp / "events.yaml").write_text(yaml.safe_dump(events), encoding="utf-8")
+    return tmp
+
+
+def test_existing_scenarios_are_pinned_to_authored_values():
+    for name in ("manor", "hollow_tide", "reanimator"):
+        s = load_scenario(PROJECT_ROOT / "data" / name)
+        assert s.dread_scale == 1.0 and s.sanity_scale == 1.0, name
+
+
+def test_unpinned_scenario_auto_scales_dread_and_sanity(tmp_path=None):
+    import tempfile
+    from game.balance import compute_dread_scale
+    with tempfile.TemporaryDirectory() as d:
+        s = load_scenario(_write_scenario(Path(d) / "big", room_count=14, cost=-10))
+    assert s.dread_scale == compute_dread_scale(14)  # 7/14 = 0.5
+    assert s.dread_scale < 1.0
+    assert s.sanity_scale < 1.0
+    # authored -10 is scaled down (and the shared necronomicon counts as a unit too)
+    assert -10 < s.items["cursed"]["on_take_sanity"] < 0
+    assert -10 < s.events[0]["sanity_effect"] < 0
+    # restoratives are left alone
+    assert s.items["tonic"]["on_use_sanity"] == 20
+
+
+def test_manifest_override_beats_auto_scaling():
+    import tempfile
+    with tempfile.TemporaryDirectory() as d:
+        s = load_scenario(_write_scenario(
+            Path(d) / "o", manifest_extra="dread_scale: 1.5\nsanity_scale: 1.0\n", room_count=14))
+    assert s.dread_scale == 1.5
+    assert s.items["cursed"]["on_take_sanity"] == -10
+
+
+def test_scaled_costs_keep_sign_and_never_round_to_zero():
+    from game.content_loader import _scale_amount
+    assert _scale_amount(-10, 0.5) == -5
+    assert _scale_amount(-1, 0.35) == -1
+    assert _scale_amount(2, 0.35) == 1
+
+
+def test_validator_rejects_nonpositive_scale():
+    scenario = Scenario(
+        name="broken", title="Broken", description="", start_room="a",
+        rooms={"a": {"name": "A", "description_variants": ["x"], "exits": {}}},
+        items={}, events=[], dread_scale=0, sanity_scale=-1,
+    )
+    errors = validate_scenario(scenario)
+    assert any("dread_scale" in e for e in errors)
+    assert any("sanity_scale" in e for e in errors)
+
+
+def test_dread_scale_lowers_presence_chance_in_engine():
+    import main as game_main
+    from game.player import Player
+
+    class FixedRandom:
+        def random(self):
+            return 0.10  # hits base lucid chance (0.12), misses once halved (0.06)
+
+    def dread_after_one_look(scale):
+        s = Scenario(
+            name="t", title="t", description="", start_room="a",
+            rooms={"a": {"name": "A", "description_variants": ["x"], "exits": {}}},
+            items={}, events=[], dread_scale=scale,
+        )
+        rooms = {"a": {"name": "A", "description": "x", "exits": {}, "items": []}}
+        p = Player(location="a")
+        import io
+        from contextlib import redirect_stdout
+        with redirect_stdout(io.StringIO()):
+            game_main.handle_command(parse("look"), p, rooms, [], FixedRandom(), s)
+        return p.dread
+
+    assert dread_after_one_look(1.0) == 1
+    assert dread_after_one_look(0.5) == 0
+
+
 def run_all():
     tests = [v for k, v in globals().items() if k.startswith("test_")]
     for t in tests:
