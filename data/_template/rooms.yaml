@@ -1,0 +1,63 @@
+# Every room needs: name, description_variants (at least one - if you
+# give more than one, one is picked at random each playthrough), and
+# exits (can be {} if there are none, but every room needs to be
+# reachable from start_room via some path of exits).
+#
+# Each exit direction (north/south/east/west/up/down/in/out) maps to
+# one of three shapes:
+#
+#   A normal exit:
+#     north:
+#       target: some_room_id
+#
+#   A locked exit (needs an item defined in items.yaml to open):
+#     down:
+#       target: some_room_id
+#       locked: true
+#       unlock_item: some_item_id
+#       locked_text: "Shown while it's still locked."
+#       unlock_text: "Shown the moment it's unlocked."
+#
+#   The win exit (no target - reaching this while holding enough
+#   is_clue items ends the game in victory: every clue by default, or
+#   fewer if the manifest sets clues_required):
+#     out:
+#       requires_all_clues: true
+#       locked_text: "Shown until the player has enough clues."
+#
+# Two more optional room fields:
+#
+#   safe: true            # a room the player can rest in ("rest"/"recover")
+#   rest_amount: 20         # sanity restored per rest (default 15 if omitted)
+#   rest_text: "..."          # shown when resting here (has a generic default)
+#
+#   risk_multiplier: 1.75  # multiplies the presence's per-turn dread chance
+#                          # while here - use for "exposed"/"public" rooms
+#                          # (see hollow_tide's market_street). Default 1.0.
+#
+#   scenery:               # optional dict of noun -> description text,
+#     mural: "..."          # examinable via "examine <noun>" (or a single
+#                           # word from a multi-word noun). Lets a room
+#                           # have texture without needing everything to
+#                           # be a pickable item. "examine <item name>"
+#                           # also now shows that item's description field.
+
+entry_room:
+  name: "The Entry Room"
+  description_variants:
+    - "A plain room. This is where the player starts."
+    - "A second possible description - one of these is chosen at random."
+  exits:
+    north:
+      target: second_room
+
+second_room:
+  name: "The Second Room"
+  description_variants:
+    - "Another room, one step further in."
+  exits:
+    south:
+      target: entry_room
+    out:
+      requires_all_clues: true
+      locked_text: "You haven't found what you need yet."

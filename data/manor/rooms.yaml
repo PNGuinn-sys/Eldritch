@@ -1,0 +1,237 @@
+# Rooms for the "manor" scenario.
+#
+# Each room needs: name, description_variants (a list - one is picked
+# at random per playthrough), and exits.
+#
+# An exit is a mapping of direction -> details:
+#   target: <room id>            required for a normal exit
+#   locked: true                 optional - blocks movement until unlocked
+#   unlock_item: <item id>       which item's "use" command unlocks it
+#   locked_text / unlock_text    flavor text for each state
+#   requires_all_clues: true     special win-condition exit (no target -
+#                                 succeeding here ends the game as a win)
+
+foyer:
+  name: "The Foyer"
+  description_variants:
+    - >-
+      Dust sheets cover most of the furniture, pale shapes in the
+      gloom. A grand staircase curls up into darkness. The front
+      door has already swung shut behind you.
+    - >-
+      Your footsteps echo off a floor of cracked black-and-white
+      tile. Somewhere above, something settles - old wood, you
+      tell yourself - and goes quiet.
+  exits:
+    north:
+      target: corridor
+    east:
+      target: drawing_room
+    west:
+      target: study
+    south:
+      target: kitchen
+    out:
+      requires_all_clues: true
+      locked_text: >-
+        The front door won't budge. Whatever is happening in this
+        house, you haven't understood it yet.
+
+drawing_room:
+  name: "The Drawing Room"
+  description_variants:
+    - >-
+      Faded velvet armchairs face a cold hearth. A portrait above
+      the mantel is too soot-stained to make out the face.
+    - >-
+      The smell of old smoke lingers, though the fireplace has
+      clearly been unused for years. Something about the room
+      feels arranged, like a stage set waiting for its cast.
+  exits:
+    west:
+      target: foyer
+
+study:
+  name: "The Study"
+  description_variants:
+    - >-
+      Shelves of ledgers line the walls, their spines swollen
+      with damp. A heavy desk sits centered, its drawers slightly
+      open, as if someone left in a hurry.
+    - >-
+      Papers are scattered across the desk, covered in a cramped
+      hand you don't recognize and can't quite stop trying to read.
+  exits:
+    east:
+      target: foyer
+
+corridor:
+  name: "The Upstairs Corridor"
+  description_variants:
+    - >-
+      A long hallway, lined with doors that don't quite match
+      the house's exterior proportions. A narrow stair leads
+      down into darkness.
+    - >-
+      The runner carpet is worn thin down the center of the
+      hall, as though something paced here for a very long time.
+  exits:
+    south:
+      target: foyer
+    north:
+      target: library
+    down:
+      target: cellar
+      locked: true
+      unlock_item: brass_key
+      locked_text: "A heavy door blocks the stairs down. It's locked."
+      unlock_text: "The key turns with a reluctant, grinding click."
+    east:
+      target: master_bedroom
+
+library:
+  name: "The Library"
+  description_variants:
+    - >-
+      Floor-to-ceiling shelves, most of them empty. The few
+      remaining books have titles in no alphabet you know.
+    - >-
+      A reading table holds a single open book, its pages
+      filled with diagrams that hurt to look at directly.
+  exits:
+    south:
+      target: corridor
+    up:
+      target: attic
+
+attic:
+  name: "The Attic"
+  description_variants:
+    - >-
+      Low rafters force you to stoop. Trunks and broken furniture
+      are stacked in shapes that seem almost deliberate.
+    - >-
+      Light filters through a single grimy window. Dust hangs
+      motionless in the air, as if the room is holding its breath.
+  exits:
+    down:
+      target: library
+
+cellar:
+  name: "The Cellar"
+  description_variants:
+    - >-
+      The air is colder here, and wetter. Something has been
+      dragged across the dirt floor, more than once.
+    - >-
+      Shelves of preserves line one wall, jars gone black with
+      age. You'd rather not look closely at what's floating in them.
+  exits:
+    up:
+      target: corridor
+
+kitchen:
+  name: "The Kitchen"
+  description_variants:
+    - >-
+      A long kitchen table dominates the room, scarred with decades
+      of use. The stove is cold, but something has clearly been
+      cooked here recently - the smell hasn't faded yet.
+    - >-
+      Copper pots hang from a rack overhead, swaying slightly though
+      the air is still. A door to the south looks sturdier than a
+      pantry door should need to be.
+  exits:
+    north:
+      target: foyer
+    east:
+      target: pantry
+    south:
+      target: dining_room
+
+pantry:
+  name: "The Pantry"
+  description_variants:
+    - >-
+      Shelves of preserves line the walls, labels faded past
+      reading. Whatever else is wrong with this house, this small
+      room feels, for now, untouched by it.
+    - >-
+      The air here is ordinary - dust and old flour, nothing more.
+      It's the first room since you arrived that doesn't feel like
+      it's paying attention to you.
+  exits:
+    west:
+      target: kitchen
+  safe: true
+  rest_amount: 20
+  rest_text: >-
+    You sit against the shelves for a while and let your breathing
+    slow. It isn't much, but it helps.
+
+dining_room:
+  name: "The Dining Room"
+  description_variants:
+    - >-
+      A long table is set for a dinner that never happened - place
+      settings for eight, though only one chair has been pulled out.
+    - >-
+      A chandelier hangs unlit above a table gone gray with dust.
+      Whoever the extra place setting was for, they clearly did not
+      attend.
+  exits:
+    north:
+      target: kitchen
+    down:
+      target: wine_cellar
+      locked: true
+      unlock_item: iron_ring
+      locked_text: "A heavy door beneath the dining room floor is bolted from this side."
+      unlock_text: "The bolt is stiff with rust, but it turns."
+
+wine_cellar:
+  name: "The Wine Cellar"
+  description_variants:
+    - >-
+      Wine racks line every wall, most of the bottles broken or
+      empty. At the far end, something has been scratched into the
+      stone, over and over, in the same shaking hand.
+    - >-
+      The air down here is thick and cold in a way that has nothing
+      to do with temperature. Whatever was stored here once, it
+      wasn't only wine.
+  exits:
+    up:
+      target: dining_room
+
+master_bedroom:
+  name: "The Master Bedroom"
+  description_variants:
+    - >-
+      A four-poster bed, still made, as if someone meant to come
+      back to it. The wardrobe door hangs slightly open onto
+      darkness that seems deeper than a wardrobe should allow.
+    - >-
+      Someone's clothes are still laid out across the bed, decades
+      out of fashion and yet somehow not fully covered in dust.
+  exits:
+    west:
+      target: corridor
+    north:
+      target: nursery
+
+nursery:
+  name: "The Nursery"
+  description_variants:
+    - >-
+      A child's room, small and still. A rocking horse sits facing
+      the wall instead of the room, which feels less like an
+      accident the longer you look at it.
+    - >-
+      Toys are arranged in a neat circle in the middle of the floor,
+      all facing inward, as though waiting for someone to sit down
+      in the center.
+  exits:
+    south:
+      target: master_bedroom
+

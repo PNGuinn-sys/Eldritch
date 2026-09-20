@@ -1,0 +1,59 @@
+# Random events for the "hollow_tide" scenario (expanded).
+# Most are one-shot (default); two are marked repeat: true for ambient
+# flavor that can recur across a longer playthrough.
+
+- id: chanting_below
+  rooms: [tunnels, sea_cave]
+  chance: 0.4
+  text: "A chant rises from somewhere below the water, too rhythmic to be the tide."
+  sanity_effect: -10
+
+- id: something_surfaces
+  rooms: [docks, cannery]
+  chance: 0.35
+  text: "Something breaks the surface of the harbor water, just once, and is gone before you can be sure what you saw."
+  sanity_effect: -5
+
+- id: watched_in_town
+  rooms: [market_street, chapel, lodge]
+  chance: 0.3
+  text: "Conversation on the street stops as you pass. Every face turns, just slightly, to follow you."
+  sanity_effect: -10
+
+- id: reef_lights
+  rooms: [reef_overlook, waterfront_row]
+  chance: 0.4
+  text: "Lights blink out on the reef in a pattern too deliberate to be a boat, then stop, as if they'd noticed you noticing."
+  sanity_effect: -10
+
+- id: footsteps_behind
+  rooms: [back_alley, waterfront_row]
+  chance: 0.2
+  text: "Footsteps echo behind you, matching your pace exactly. When you stop, so do they."
+  sanity_effect: -5
+  repeat: true
+
+- id: childrens_laughter
+  rooms: [worker_housing]
+  chance: 0.35
+  text: "Laughter carries from an upstairs room down the row - children's laughter, pitched in a way that doesn't sound quite like play."
+  sanity_effect: -10
+
+- id: portrait_watching
+  rooms: [hallowell_estate, estate_study]
+  chance: 0.4
+  text: "You'd swear the portraits' eyes have all shifted a fraction toward you since you last looked."
+  sanity_effect: -10
+
+- id: bell_tolling
+  rooms: [town_hall, cemetery, records_room]
+  chance: 0.15
+  text: "Somewhere, a bell tolls a number of times you don't quite manage to count."
+  sanity_effect: -5
+  repeat: true
+
+- id: cold_spot
+  rooms: [estate_cellar]
+  chance: 0.45
+  text: "The temperature drops sharply, and with it comes the smell of low tide - though the sea is well out of reach down here."
+  sanity_effect: -10

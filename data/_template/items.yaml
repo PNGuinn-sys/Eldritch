@@ -1,0 +1,22 @@
+# Every item needs: name, valid_rooms (a list of room ids it might
+# spawn in - one is picked at random each playthrough).
+#
+# Optional fields:
+#   description    - shown if you add an "examine" feature later (unused for now)
+#   on_take_sanity - integer, usually negative, applied when picked up
+#   on_take_text   - flavor text printed when picked up
+#   is_clue        - true/false. If ANY item has is_clue: true, some
+#                    room exit must have requires_all_clues: true (and
+#                    vice versa) - the validator checks this for you.
+#   on_use_sanity  - a rare restorative: a positive amount restored via
+#                    "use <item>". Consumes the item. Don't combine with
+#                    is_clue - the validator will catch it if you do.
+#   on_use_text    - flavor text printed when used this way
+
+example_clue:
+  name: "example clue"
+  description: "A clue, for demonstration purposes."
+  valid_rooms: [entry_room, second_room]
+  on_take_sanity: -5
+  on_take_text: "Flavor text shown the moment the player picks this up."
+  is_clue: true

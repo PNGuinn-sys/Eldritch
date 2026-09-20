@@ -1,0 +1,17 @@
+# Manifest for the "manor" scenario.
+# title/start_room are required; intro is optional flavor text printed
+# once, before the first room description.
+#
+# max_sanity and clues_required are both optional - they default to
+# 100 and "all clues" respectively if omitted (see Hollow Tide, which
+# doesn't set either). The manor sets both now that it's bigger: a
+# larger sanity pool to match more content, and a partial clue
+# requirement so 2 of the 8 clues are genuinely optional.
+
+title: "The Manor"
+start_room: foyer
+max_sanity: 150
+clues_required: 6
+intro: >-
+  You don't remember agreeing to come here. You remember only that the
+  invitation felt impossible to refuse.

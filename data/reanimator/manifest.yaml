@@ -1,0 +1,47 @@
+# Manifest for the "reanimator" scenario.
+#
+# A third scenario, inspired by Lovecraft's "Herbert West-Reanimator"
+# (1922, public domain). Unlike the original story, the player isn't
+# West's complicit assistant - they're an outside investigator, tracing
+# his experiments after the fact, which keeps this in line with the
+# engine's "investigate, don't participate" design.
+
+title: "The Reagent"
+description: >
+  A detective investigating a string of disappearances and disturbed
+  graves traces them back to a brilliant, morally absent young
+  physician's experiments in reviving the dead - and to what those
+  experiments left walking.
+start_room: college_gates
+intro: >-
+  Three grave robberies in two months, and a groundskeeper who swears
+  he heard something climb back out of the ground under its own power.
+  The dean wants it handled quietly. You're the only one they've
+  called who isn't already afraid to ask why.
+
+max_sanity: 150
+clues_required: 6
+
+threat:
+  threshold: 3
+  chance_by_tier:
+    lucid: 0.12
+    uneasy: 0.24
+    fraying: 0.38
+    broken: 0.55
+  manifest_text: >-
+    Something lurches into view, moving in the stiff, wrong rhythm of
+    muscle remembering how to work rather than knowing how. Whatever's
+    left of its face hasn't decided yet whether it recognizes you as
+    prey.
+  caught_text: >-
+    It doesn't need to be fast. It only needs to not stop, and it does
+    not stop.
+
+
+    You are not found. Not by anyone who could still help.
+  evade_text: "You don't wait to see how coordinated it's gotten. You move."
+  hide_text: >-
+    You press into the dark and go still. Whatever passed doesn't hunt
+    by sight, or not reliably, not yet. After a long moment, the
+    shuffling recedes.

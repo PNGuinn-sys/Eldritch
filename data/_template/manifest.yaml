@@ -1,0 +1,59 @@
+# TEMPLATE SCENARIO
+# This is the smallest possible complete, valid scenario. Copy this
+# whole "_template" folder, rename it, and edit the copy to start a
+# new adventure - or copy "manor" or "hollow_tide" instead if you'd
+# rather start from something bigger.
+#
+# Try it as-is first: python main.py --scenario _template
+
+title: "Template Scenario"        # required - shown in the banner at startup
+description: >                     # optional - documentation only, not shown in-game
+  A minimal, fully valid scenario used as a starting template.
+start_room: entry_room             # required - must match a key in rooms.yaml
+intro: >-                          # optional - shown once, before the first room
+  This is optional intro text, printed once before the first room
+  description. Delete this line if you don't want any.
+
+# --- Scaling knobs (all optional - omit any/all of these and you get
+# the manor's original numbers) ---
+#
+# max_sanity: 100          # sanity pool size. Bigger scenarios with more
+#                           # clues/rooms should raise this so the math
+#                           # still works out - see hollow_tide (100,
+#                           # small/tight) vs manor (150, bigger).
+# clues_required: 3        # how many is_clue items are needed to win,
+#                           # if less than the total (a partial/forgiving
+#                           # threshold). Omit to require every clue.
+# sanity_tier_thresholds:   # override where Lucid/Uneasy/Fraying start,
+#                           # as a percentage of max_sanity (0-1). Omit
+#                           # any key to keep its 80/50/25% default.
+#   lucid: 0.80
+#   uneasy: 0.50
+#   fraying: 0.25
+
+# --- Re-skinning the stalking presence ---
+#
+# Every scenario shares the same underlying mechanic (dread quietly
+# builds, then the threat manifests and you must flee or hide) - but
+# `threat` lets you retune its pacing and completely rewrite its flavor
+# text, so it can feel like a wholly different menace per scenario (see
+# hollow_tide's "shambler" vs the manor's unnamed "presence", which is
+# just the engine's built-in default text). Omit any field you don't
+# want to override.
+#
+# threat:
+#   threshold: 3                  # dread points needed before it manifests
+#   chance_by_tier:                # per-turn chance of +1 dread, by sanity tier
+#     lucid: 0.12
+#     uneasy: 0.22
+#     fraying: 0.35
+#     broken: 0.50
+#   manifest_text: "..."            # shown when it appears in your room
+#   caught_text: "..."               # shown if you don't flee/hide in time
+#   evade_text: "..."                 # shown if you flee successfully
+#   hide_text: "..."                   # shown if you hide successfully
+
+# --- Custom win/loss text (optional - omit for the engine defaults) ---
+# win_text: "..."
+# broken_text: "..."          # shown if sanity hits 0
+

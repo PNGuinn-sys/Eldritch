@@ -1,0 +1,119 @@
+# Items for the "manor" scenario.
+#
+# Each item needs: name, valid_rooms (one is picked at random per
+# playthrough as where it spawns). Optional: description, on_take_sanity
+# (sanity delta applied when picked up), on_take_text (flavor shown when
+# picked up), is_clue (counts toward the win condition), on_use_sanity
+# (a rare restorative - using this item via "use <item>" applies this
+# positive sanity delta, prints on_use_text, and consumes the item).
+# Don't combine is_clue with on_use_sanity - using it would consume a
+# required clue.
+
+brass_key:
+  name: "brass key"
+  description: "An old brass key, warm to the touch despite the cold."
+  valid_rooms: [study, drawing_room, library]
+  on_take_sanity: -10
+  on_take_text: >-
+    It's warmer than a piece of metal has any right to be. You
+    pocket it anyway.
+
+old_journal:
+  name: "old journal"
+  description: "A water-damaged journal, its later pages illegible."
+  valid_rooms: [study, foyer, drawing_room]
+  on_take_sanity: -15
+  on_take_text: >-
+    Most of it is ruined, but one entry survives: 'It listens
+    when we speak of leaving. We have stopped speaking of
+    leaving.'
+  is_clue: true
+
+torn_letter:
+  name: "torn letter"
+  description: "Half a letter, the rest burned away at the edges."
+  valid_rooms: [study, library, corridor]
+  on_take_sanity: -10
+  on_take_text: >-
+    '...told them not to dig beneath the cellar. They didn't
+    listen. None of us have felt quite whole since.'
+  is_clue: true
+
+childs_drawing:
+  name: "child's drawing"
+  description: "A crayon drawing, curling at the corners."
+  valid_rooms: [attic, drawing_room, foyer]
+  on_take_sanity: -10
+  on_take_text: >-
+    A child's crayon drawing of this house - and of a tall,
+    thin shape standing in every window at once.
+  is_clue: true
+
+family_photograph:
+  name: "family photograph"
+  description: "A formal portrait, slightly out of focus."
+  valid_rooms: [cellar, library, corridor]
+  on_take_sanity: -10
+  on_take_text: >-
+    A family of five, posed stiffly. You count them twice,
+    certain you're miscounting. There are six chairs.
+  is_clue: true
+
+iron_ring:
+  name: "iron ring"
+  description: "A small iron ring holding a single tarnished key."
+  valid_rooms: [kitchen, master_bedroom, nursery]
+  on_take_sanity: -10
+  on_take_text: >-
+    Whoever last carried this took very good care of it, for
+    something so plainly meant to stay hidden.
+
+toy_soldier:
+  name: "toy soldier"
+  description: "A hand-carved toy soldier, paint worn thin."
+  valid_rooms: [nursery, master_bedroom, attic]
+  on_take_sanity: -10
+  on_take_text: >-
+    The paint has worn away everywhere except the eyes, which
+    someone kept touching up long after the rest was allowed to fade.
+  is_clue: true
+
+household_ledger:
+  name: "household ledger"
+  description: "A record of household accounts, meticulously kept."
+  valid_rooms: [kitchen, dining_room, study]
+  on_take_sanity: -10
+  on_take_text: >-
+    Deliveries are logged weekly, itemized in detail - except for
+    one recurring entry, marked only with a quantity and a spiral.
+  is_clue: true
+
+sealed_note:
+  name: "sealed note"
+  description: "A note, sealed with wax that has never been broken."
+  valid_rooms: [wine_cellar, cellar, dining_room]
+  on_take_sanity: -15
+  on_take_text: >-
+    Whoever sealed this clearly meant for it to never be opened.
+    You open it anyway. You wish you were the kind of person who wouldn't have.
+  is_clue: true
+
+prayer_book:
+  name: "prayer book"
+  description: "A small prayer book, its margins densely annotated."
+  valid_rooms: [dining_room, drawing_room, master_bedroom]
+  on_take_sanity: -10
+  on_take_text: >-
+    Every printed prayer has been crossed out and rewritten in the
+    margin, addressed to something the book itself was never
+    meant to name.
+  is_clue: true
+
+silver_locket:
+  name: "silver locket"
+  description: "A small silver locket, the clasp worn smooth from handling."
+  valid_rooms: [nursery, master_bedroom, pantry]
+  on_use_sanity: 25
+  on_use_text: >-
+    Inside is a photograph too faded to make out clearly - but holding
+    it steadies you anyway, in a way you can't quite explain.

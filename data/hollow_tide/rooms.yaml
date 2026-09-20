@@ -1,0 +1,435 @@
+# Rooms for the "hollow_tide" scenario (Innsmouth-style, expanded).
+#
+# Five loose clusters, all reachable from the docks:
+#   waterfront: docks, waterfront_row, anchor_inn, anchor_inn_room, reef_overlook
+#   town core:  market_street, chapel, lodge, town_hall, records_room
+#   back way:   back_alley (bypasses market_street's risk)
+#   industrial: cannery, tunnels, sea_cave, refinery, refinery_office, worker_housing
+#   hill:       hill_road, hallowell_estate, estate_study, estate_cellar, cemetery
+
+docks:
+  name: "The Docks"
+  description_variants:
+    - >-
+      The pier creaks under a fog that never quite lifts. Fishing boats
+      sit low and dark in the water, though none look like they've gone
+      out in weeks. The road that brought you here vanishes into the
+      mist behind you.
+    - >-
+      Gulls circle without calling, wheeling over water that's too
+      still for open sea. A weathered sign reads WELCOME TO HOLLOW
+      TIDE, the paint long since given up on itself.
+  exits:
+    north:
+      target: market_street
+    west:
+      target: cannery
+    east:
+      target: waterfront_row
+    south:
+      target: back_alley
+    out:
+      requires_all_clues: true
+      locked_text: >-
+        You're not ready to leave. Not yet - not with this much still
+        unaccounted for, and the causeway's edges are already going
+        under.
+  safe: true
+  rest_amount: 20
+  rest_text: >-
+    You sit on a bollard at the edge of the pier, facing the road out.
+    For a few minutes, at least, nothing here is looking back at you.
+  scenery:
+    boats: >-
+      Half a dozen boats, none rigged to actually go anywhere. Nets are
+      folded on the decks with a care nobody's used to actually fish.
+    sign: >-
+      WELCOME TO HOLLOW TIDE, and under it, in smaller and much older
+      lettering: A TOWN THAT KEEPS ITS PROMISES.
+
+waterfront_row:
+  name: "Waterfront Row"
+  description_variants:
+    - >-
+      A row of shopfronts facing the water, most of them boarded, their
+      old signage bleached unreadable. One window still holds a
+      handwritten sign: ROOMS - INQUIRE AT THE ANCHOR.
+    - >-
+      The boardwalk has rotted through in places, patched with mismatched
+      planks that don't quite hide the gaps. The water underneath sounds
+      busier than the tide should account for.
+  exits:
+    west:
+      target: docks
+    north:
+      target: anchor_inn
+    east:
+      target: reef_overlook
+
+anchor_inn:
+  name: "The Anchor Inn"
+  description_variants:
+    - >-
+      A lobby that was once someone's front parlor, a guest register
+      open on a podium by the stairs. Nobody's at the desk, though you
+      have the persistent sense someone just stepped out of sight.
+    - >-
+      Faded nautical prints line the walls, all of the same stretch of
+      water, all clearly painted by someone who'd never actually left
+      town to see anywhere else.
+  exits:
+    south:
+      target: waterfront_row
+    up:
+      target: anchor_inn_room
+
+anchor_inn_room:
+  name: "A Room at the Anchor Inn"
+  description_variants:
+    - >-
+      A narrow room under the eaves, the bed made up too neatly for a
+      building this abandoned-feeling. The window looks out over the
+      water and, faintly, the reef beyond it.
+    - >-
+      Someone has left the washbasin full. The water in it has a film
+      on the surface that catches the light strangely when you're not
+      looking directly at it.
+  exits:
+    down:
+      target: anchor_inn
+  safe: true
+  rest_amount: 25
+  rest_text: >-
+    You lock the door - for whatever that's worth here - and sit with
+    your back against it until your hands stop shaking.
+
+reef_overlook:
+  name: "The Reef Overlook"
+  description_variants:
+    - >-
+      A cliff path ends at a break in the fog, just enough to see out
+      past the harbor mouth to where a long dark line of rock breaks
+      the surface, further out than it has any right to be visible.
+    - >-
+      Someone has worn a genuine path to this exact spot, over what
+      must have been years. Whatever the view usually holds, people
+      keep coming back to see it.
+  exits:
+    west:
+      target: waterfront_row
+  scenery:
+    reef: >-
+      The shape out on the water doesn't move like rock should, and at
+      this distance you can't convince yourself it's kelp, either.
+      Twice, while you watch, part of it submerges and something else
+      briefly doesn't.
+
+market_street:
+  name: "Market Street"
+  description_variants:
+    - >-
+      A single row of shopfronts, half of them shuttered. The ones
+      still open have curtains drawn, though you can feel eyes on you
+      from behind the glass.
+    - >-
+      The street smells of salt and something underneath it, sweeter
+      and worse. A hand-lettered sign in a window reads ALL ARE
+      WELCOME AT THE TIDE - though nobody on the street will meet your
+      eyes.
+  exits:
+    south:
+      target: docks
+    east:
+      target: chapel
+    north:
+      target: lodge
+    west:
+      target: town_hall
+  # Out in the open, in view of a town that's noticed you're not one
+  # of them - riskier than anywhere else in Hollow Tide.
+  risk_multiplier: 1.75
+
+chapel:
+  name: "The Chapel"
+  description_variants:
+    - >-
+      The old chapel's cross has been taken down, and something else
+      stands in its place above the door - a shape with too many
+      angles to be comfortable to look at.
+    - >-
+      Pews face an altar draped in fishing net instead of cloth. The
+      air smells of brine and old candle wax, and the silence has a
+      weight to it.
+  exits:
+    west:
+      target: market_street
+
+lodge:
+  name: "The Order Hall"
+  description_variants:
+    - >-
+      A meeting hall with the windows painted over. Rows of chairs
+      face a lectern carved with spirals that seem to shift when
+      you're not looking directly at them.
+    - >-
+      Robes hang from pegs along one wall, still damp. Whatever met
+      here left in a hurry, or expects to be back very soon.
+  exits:
+    south:
+      target: market_street
+    west:
+      target: back_alley
+
+town_hall:
+  name: "Town Hall"
+  description_variants:
+    - >-
+      A municipal building nobody seems to actually use for municipal
+      business. The counters are dusty except for one, kept
+      conspicuously clean.
+    - >-
+      Public notices paper one wall, dated across decades, all in the
+      same tone: routine, orderly, and entirely uninterested in where
+      certain names went after a certain point.
+  exits:
+    east:
+      target: market_street
+    down:
+      target: records_room
+      locked: true
+      unlock_item: records_key
+      locked_text: "The records room is locked, and the desk clerk's drawer that should hold a key is empty."
+      unlock_text: "The lock turns stiffly, like it hasn't been asked to in a long time."
+  scenery:
+    notices: >-
+      Names, dates, and the same three phrases rotated through decade
+      after decade: moved on, relocated, no longer resides in the
+      township. Never an address. Never a reason.
+
+records_room:
+  name: "The Records Room"
+  description_variants:
+    - >-
+      Filing cabinets line every wall, drawers labeled by decade going
+      back further than the building looks like it should stand for.
+    - >-
+      The air is dry here in a way the rest of the town isn't, like
+      something is being deliberately preserved rather than left to rot.
+  exits:
+    up:
+      target: town_hall
+
+back_alley:
+  name: "The Back Alley"
+  description_variants:
+    - >-
+      A narrow way between buildings, chosen by anyone in Hollow Tide
+      who'd rather not be seen on the main street. Judging by the wear
+      on the cobbles, that's most people.
+    - >-
+      Laundry lines crisscross overhead, hung with clothes that don't
+      look like they fit anyone currently living in this town.
+  exits:
+    north:
+      target: docks
+    east:
+      target: lodge
+    up:
+      target: hill_road
+
+cannery:
+  name: "The Cannery"
+  description_variants:
+    - >-
+      Rusted machinery lines the walls, unused for years by the look
+      of the dust - except for a clear path worn into the floor,
+      leading to a trapdoor.
+    - >-
+      The smell here is wrong even for a cannery - not just fish, but
+      something that has been in the water much longer than fish
+      usually last.
+  exits:
+    east:
+      target: docks
+    down:
+      target: tunnels
+      locked: true
+      unlock_item: tide_worn_key
+      locked_text: "A trapdoor in the floor is bolted shut from this side. It'll need a key."
+      unlock_text: "The bolt gives way easier than it should, like it wanted to be opened."
+    south:
+      target: refinery
+
+refinery:
+  name: "The Refinery"
+  description_variants:
+    - >-
+      A processing plant far larger than a town this size should
+      support, most of its lines idle. What it's actually refining
+      isn't obviously fish.
+    - >-
+      Ledgers are stacked by a foreman's station nobody's staffed in
+      years, each one meticulously kept right up until it isn't.
+  exits:
+    north:
+      target: cannery
+    east:
+      target: refinery_office
+      locked: true
+      unlock_item: refinery_key
+      locked_text: "The foreman's office is locked. Someone still cares who sees inside."
+      unlock_text: "The key turns with the particular reluctance of a lock that expects to stay shut."
+    south:
+      target: worker_housing
+
+refinery_office:
+  name: "The Foreman's Office"
+  description_variants:
+    - >-
+      A cramped office, every surface covered in shipping paperwork.
+      None of the cargo weights on the manifests match anything you'd
+      expect a cannery to move.
+    - >-
+      A safe stands open and empty in one corner - not robbed, just
+      emptied, deliberately, a long time before you got here.
+  exits:
+    west:
+      target: refinery
+
+worker_housing:
+  name: "Worker Housing"
+  description_variants:
+    - >-
+      Rows of identical narrow rooms, most doors standing open on
+      identical narrow lives. A few are still lived in. You can't tell
+      which, and you'd rather not knock to find out.
+    - >-
+      Children's things are scattered in one doorway - shoes, a
+      half-built toy - though the room behind it is silent and dark.
+  exits:
+    north:
+      target: refinery
+
+tunnels:
+  name: "The Tunnels"
+  description_variants:
+    - >-
+      Roughly cut passageways, walls slick with condensation that
+      shouldn't be there this far from the shore. The sound of water
+      is louder here than it has any right to be.
+    - >-
+      Carvings line the tunnel walls, the same spiral shapes from the
+      Order Hall, cut deeper and older. Somewhere ahead, the passage
+      slopes down toward the sound of the sea.
+  exits:
+    up:
+      target: cannery
+    north:
+      target: sea_cave
+
+sea_cave:
+  name: "The Sea Cave"
+  description_variants:
+    - >-
+      The tunnel opens into a cavern lit by a pale, sourceless glow.
+      At the center, something huge and stone-carved rises out of
+      black water, and the water is not still.
+    - >-
+      Salt water pools around a shape too large to have been carved
+      by anyone sane. Whatever this is, the town didn't build it. The
+      town just found it, and started listening.
+  exits:
+    south:
+      target: tunnels
+
+hill_road:
+  name: "Hill Road"
+  description_variants:
+    - >-
+      A steep road climbing away from the water, the fog thinning
+      slightly with the altitude. It doesn't feel like an improvement.
+    - >-
+      Old gaslamps line the road, unlit and rusted, though the glass in
+      a few of them still isn't broken - which somehow feels worse.
+  exits:
+    down:
+      target: back_alley
+    north:
+      target: hallowell_estate
+      locked: true
+      unlock_item: estate_key
+      locked_text: "The estate gate is chained and locked. The Hallowells were never known for hospitality."
+      unlock_text: "The chain comes loose far too easily, as if it were only ever there for show."
+    east:
+      target: cemetery
+
+cemetery:
+  name: "The Cemetery"
+  description_variants:
+    - >-
+      Headstones lean at every angle, names repeating across them in a
+      pattern that takes a moment to notice: the same handful of
+      family names, generation after generation, going back centuries.
+    - >-
+      Fresh flowers have been left on graves that, by their dates,
+      shouldn't have anyone left alive to remember them.
+  exits:
+    west:
+      target: hill_road
+  scenery:
+    headstones: >-
+      The dates repeat in a rhythm that isn't quite believable - the
+      same three family names trading off decade after decade, and no
+      grave newer than a hundred years, despite the fresh flowers.
+
+hallowell_estate:
+  name: "The Hallowell Estate"
+  description_variants:
+    - >-
+      A grand house gone to rot with a strange dignity, like decay here
+      was planned for. A hallway of family portraits leads deeper in.
+    - >-
+      Dust sheets cover most of the furniture, but the portraits are
+      spotless, each face a little less certain which century it
+      belongs to than the one before it.
+  exits:
+    south:
+      target: hill_road
+    east:
+      target: estate_study
+    down:
+      target: estate_cellar
+  scenery:
+    portraits: >-
+      Generations of the same family, painted a little further from
+      human each time, until the most recent frames simply stopped
+      including faces at all.
+
+estate_study:
+  name: "The Estate Study"
+  description_variants:
+    - >-
+      A study lined with ledgers older than the town's official
+      records, detailing a bargain in language that predates any
+      language you recognize.
+    - >-
+      A writing desk, drawers still full, as if whoever last used it
+      meant to come back the same afternoon and simply never did.
+  exits:
+    west:
+      target: hallowell_estate
+
+estate_cellar:
+  name: "The Estate Cellar"
+  description_variants:
+    - >-
+      A cellar far deeper than the house above it should allow, the
+      walls damp with water that has no obvious way of reaching this
+      far inland.
+    - >-
+      Old ritual implements are arranged with a care that has nothing
+      to do with reverence and everything to do with maintenance, like
+      keeping a piece of machinery in working order.
+  exits:
+    up:
+      target: hallowell_estate

@@ -1,0 +1,42 @@
+# Manifest for the "hollow_tide" scenario.
+#
+# This is Eldritch's Innsmouth: a tide-locked fishing town, an isolated
+# congregation running it from the inside, and a bargain with something
+# offshore that long since stopped being metaphorical. Deliberately
+# bigger and looser than the manor - not every corner needs to be
+# checked to leave, which matters more the bigger a town gets.
+
+title: "Hollow Tide"
+description: >
+  A dying fishing town on a causeway that floods at high tide, and a
+  congregation that has stopped pretending to worship anything human.
+start_room: docks
+intro: >-
+  The bus doesn't come back through Hollow Tide until morning. You
+  didn't plan on staying the night - but the causeway floods at high
+  tide, and something in this town clearly doesn't want you to leave
+  before it turns.
+
+max_sanity: 200
+clues_required: 7
+
+threat:
+  threshold: 3
+  chance_by_tier:
+    lucid: 0.12
+    uneasy: 0.24
+    fraying: 0.38
+    broken: 0.55
+  manifest_text: >-
+    Something shambles into view at the edge of the fog, too large to
+    be a person, moving like it hasn't yet decided how many legs to use.
+  caught_text: >-
+    It doesn't hurry. It doesn't need to. By the time you think to run,
+    it's already close enough that running has stopped being the point.
+
+
+    You are not found. Not by anyone who could still help.
+  evade_text: "You don't stay to get a better look. You move."
+  hide_text: >-
+    You go still in the dark and let the fog do the rest. After a long
+    moment, the shambling sound fades back toward the water.

@@ -1,0 +1,182 @@
+# Items for the "hollow_tide" scenario (expanded).
+# 4 keys, 11 clues (7 needed to win - see manifest.yaml), 2 curatives.
+
+tide_worn_key:
+  name: "tide-worn key"
+  description: "A key gone green with corrosion, salt-crusted but still turning."
+  valid_rooms: [market_street, chapel, lodge, town_hall]
+  on_take_sanity: -5
+  on_take_text: >-
+    It's colder than the air around it, like it's been underwater far
+    more recently than it should have been.
+
+refinery_key:
+  name: "refinery key"
+  description: "A heavy brass key stamped with a foreman's initials."
+  valid_rooms: [cannery, worker_housing, waterfront_row]
+  on_take_sanity: -5
+  on_take_text: >-
+    Whoever carried this had it on them constantly - the stamping has
+    worn nearly smooth from a thumb running over it, over and over.
+
+records_key:
+  name: "records key"
+  description: "A small steel key on a tag reading simply KEEP."
+  valid_rooms: [town_hall, back_alley, anchor_inn]
+  on_take_sanity: -5
+  on_take_text: >-
+    Just the one word on the tag. You can't decide if it was an
+    instruction to the key's owner, or to whatever the key opens.
+
+estate_key:
+  name: "estate key"
+  description: "An ornate, old-fashioned key, heavier than it looks."
+  valid_rooms: [records_room, back_alley, cemetery]
+  on_take_sanity: -10
+  on_take_text: >-
+    It's engraved with a single spiral, matching the ones in the Order
+    Hall - as if the family up the hill and the congregation downtown
+    were never really two different things.
+
+fishing_ledger:
+  name: "fishing ledger"
+  description: "A logbook of catches, going back decades."
+  valid_rooms: [docks, cannery, market_street]
+  on_take_sanity: -10
+  on_take_text: >-
+    The good years are all marked the same way: a small spiral drawn
+    in the margin, and beside it, a name. The names stop appearing
+    anywhere else in town after that.
+  is_clue: true
+
+cult_pamphlet:
+  name: "cult pamphlet"
+  description: "A thin religious tract, water-stained but legible."
+  valid_rooms: [chapel, lodge, market_street]
+  on_take_sanity: -10
+  on_take_text: >-
+    "The Order of the Tide welcomes all who are willing to give what
+    the sea asks for, in exchange for what it can give back." It
+    doesn't say what it asks for. You have a guess.
+  is_clue: true
+
+waterlogged_letter:
+  name: "waterlogged letter"
+  description: "A letter, the ink running but the handwriting still urgent."
+  valid_rooms: [docks, cannery, tunnels]
+  on_take_sanity: -10
+  on_take_text: >-
+    "...my brother went down to the shrine three nights ago to prove
+    he wasn't afraid. He came back. I almost wish he hadn't."
+  is_clue: true
+
+carved_talisman:
+  name: "carved talisman"
+  description: "A small stone carving, unpleasant to hold for long."
+  valid_rooms: [lodge, tunnels, sea_cave]
+  on_take_sanity: -15
+  on_take_text: >-
+    The carving depicts something vast, coiled, and patient. The
+    single word scratched beneath it needs no translation: Cthulhu.
+  is_clue: true
+
+necronomicon:
+  name: "necronomicon"
+  description: >-
+    A heavy book bound in something that was never leather. You can tell,
+    just holding it, that skimming it is one thing and actually reading
+    it is another - and that the second one isn't a decision you get to
+    take back. Reading it costs roughly half of whatever sanity you have
+    left, leaves you unable to recover any more of it for the rest of
+    this attempt, and grants the equivalent of two clues in return.
+    There's no reading it partway.
+  valid_rooms: [lodge]
+  on_take_sanity: -20
+  on_take_text: >-
+    It falls open to a well-worn page on its own, as if it's been
+    waiting for someone to finally come and read it aloud. You don't.
+    You still understand more of it than you'd like.
+
+guest_register:
+  name: "guest register"
+  description: "The Anchor Inn's guest book, most pages blank for years."
+  valid_rooms: [anchor_inn, anchor_inn_room, waterfront_row]
+  on_take_sanity: -10
+  on_take_text: >-
+    A dozen names check in across the last decade. None of them check
+    out. The innkeeper's handwriting adds the same note beside each:
+    "settled in nicely."
+  is_clue: true
+
+shipping_manifest:
+  name: "shipping manifest"
+  description: "A cargo manifest for the refinery's outbound shipments."
+  valid_rooms: [refinery, refinery_office, worker_housing]
+  on_take_sanity: -10
+  on_take_text: >-
+    The weights are listed in careful columns. Whatever's actually in
+    the crates, it isn't fish, and it isn't gold either, whatever the
+    manifest's heading claims.
+  is_clue: true
+
+genealogy_chart:
+  name: "genealogy chart"
+  description: "A hand-drawn family tree, spanning an improbable number of generations."
+  valid_rooms: [records_room, town_hall, hallowell_estate]
+  on_take_sanity: -10
+  on_take_text: >-
+    Three family names marry into each other again and again, going
+    back further than the chart has room to draw. Every few
+    generations, a name is annotated: "returned to the water."
+  is_clue: true
+
+engraved_ring:
+  name: "engraved ring"
+  description: "A heavy ring, the engraving worn nearly smooth."
+  valid_rooms: [estate_study, estate_cellar, hallowell_estate]
+  on_take_sanity: -15
+  on_take_text: >-
+    It's been resized many times, the engraving re-cut each time to
+    fit a slightly different hand - as if it's been passed down
+    through a family that doesn't always stay quite the same shape.
+  is_clue: true
+
+gravestone_rubbing:
+  name: "gravestone rubbing"
+  description: "A charcoal rubbing taken from an old headstone."
+  valid_rooms: [cemetery, hill_road, back_alley]
+  on_take_sanity: -10
+  on_take_text: >-
+    Whoever made this rubbing pressed hard enough to tear the paper in
+    places - right over the parts of the epitaph that aren't in any
+    language you can place.
+  is_clue: true
+
+brass_spyglass:
+  name: "brass spyglass"
+  description: "An old brass spyglass, the lens slightly warped."
+  valid_rooms: [reef_overlook, docks, waterfront_row]
+  on_take_sanity: -10
+  on_take_text: >-
+    Through the warped lens, the reef resolves into something with
+    edges too regular for stone. You lower the spyglass before you can
+    finish counting them.
+  is_clue: true
+
+sailors_ward:
+  name: "sailor's ward"
+  description: "A small carved charm on a length of tarred string."
+  valid_rooms: [docks, market_street, cannery]
+  on_use_sanity: 20
+  on_use_text: >-
+    An old habit, not a real one - you know that. You hold it anyway,
+    and for a moment your hands stop shaking.
+
+creased_photograph:
+  name: "creased photograph"
+  description: "A photograph, soft at the folds from being carried a long time."
+  valid_rooms: [anchor_inn_room, waterfront_row, docks]
+  on_use_sanity: 25
+  on_use_text: >-
+    Somewhere that isn't Hollow Tide, in a life that still makes sense.
+    You'd almost forgotten what that looked like. It helps, remembering.

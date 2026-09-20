@@ -1,0 +1,18 @@
+# A list of random events. Use [] if you don't want any yet.
+#
+# Each event needs: id (unique string), rooms (list of room ids it can
+# fire in), chance (0.0-1.0 probability, rolled once each time the
+# player enters one of those rooms), text (printed when it fires).
+#
+# Optional: sanity_effect - integer, usually negative.
+#           repeat - true/false (default false). By default an event
+#           fires at most once per playthrough; repeat: true lets it
+#           fire again on future visits too (good for ambient flavor
+#           like footsteps or a distant bell, as opposed to a one-time
+#           story beat).
+
+- id: example_event
+  rooms: [second_room]
+  chance: 0.5
+  text: "An example random event, firing in the second room."
+  sanity_effect: -5

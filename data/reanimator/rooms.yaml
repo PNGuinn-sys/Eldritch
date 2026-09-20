@@ -1,0 +1,245 @@
+# Rooms for the "reanimator" scenario.
+#
+# college_gates (start, safe) -> quadrangle (hub) -> four wings:
+#   academic:  lecture_hall -> anatomy_lab
+#   records:   library -> west_office (locked)
+#   medical:   infirmary -> cemetery -> caretakers_cottage
+#   the work:  morgue (risky) -> basement_laboratory (locked, riskier) -> holding_cells
+
+college_gates:
+  name: "The College Gates"
+  description_variants:
+    - >-
+      Wrought iron gates, ALDERMERE MEDICAL COLLEGE lettered above them
+      in brass gone green at the edges. The campus beyond is quiet in
+      a way that feels arranged rather than peaceful.
+    - >-
+      A gatehouse stands empty, its logbook open to a page with more
+      gaps in it than entries. Whoever should be keeping it hasn't
+      wanted to lately.
+  exits:
+    north:
+      target: quadrangle
+    out:
+      requires_all_clues: true
+      locked_text: >-
+        You're not leaving yet - not with this many questions still
+        open, and the dean still expecting an answer you can't give.
+  safe: true
+  rest_amount: 20
+  rest_text: >-
+    You stand outside the gates a while, back to the campus, and let
+    the ordinary sound of the street remind you the rest of the world
+    is still there.
+  scenery:
+    logbook: >-
+      Visitor names, thinning out over the last two months. The
+      gatehouse keeper's own signature stops appearing entirely three
+      weeks ago.
+
+quadrangle:
+  name: "The Quadrangle"
+  description_variants:
+    - >-
+      A square of dead grass ringed by the college's main buildings.
+      Students cross it quickly and don't linger, even on what should
+      be a pleasant afternoon.
+    - >-
+      A statue of the college's founder stands in the center, moss
+      thickening in the folds of his stone coat. Someone has scratched
+      something into the base, mostly worn away now.
+  exits:
+    south:
+      target: college_gates
+    east:
+      target: lecture_hall
+    west:
+      target: library
+    north:
+      target: infirmary
+
+lecture_hall:
+  name: "The Lecture Hall"
+  description_variants:
+    - >-
+      Tiered seating faces an empty podium. A chalkboard still reads
+      the topic of the last lecture given here: "On the Reversibility
+      of Cellular Death - Pt. III." No Part IV was ever announced.
+    - >-
+      The hall smells faintly of formaldehyde, though no specimens are
+      in evidence. Someone has been careful to leave nothing out.
+  exits:
+    west:
+      target: quadrangle
+    down:
+      target: anatomy_lab
+
+anatomy_lab:
+  name: "The Anatomy Laboratory"
+  description_variants:
+    - >-
+      Dissection tables in neat rows, scrubbed cleaner than a teaching
+      lab has any real reason to be. The cleaning was thorough. It
+      was not thorough enough.
+    - >-
+      A supply cabinet stands unlocked, inventory sheets pinned inside
+      the door. Several chemical names have been crossed out and
+      replaced with a single word, repeated: REAGENT.
+  exits:
+    up:
+      target: lecture_hall
+    east:
+      target: morgue
+
+library:
+  name: "The Medical Library"
+  description_variants:
+    - >-
+      Shelves of anatomical texts, one section conspicuously reordered
+      as though searched recently and put back in a hurry.
+    - >-
+      A reading table holds a stack of journals with pages razored
+      out - always the same author's name still visible in the
+      remaining table of contents: H. West.
+  exits:
+    east:
+      target: quadrangle
+    up:
+      target: west_office
+      locked: true
+      unlock_item: office_key
+      locked_text: "The stairwell to the faculty offices is gated and locked after hours."
+      unlock_text: "The lock gives after a moment, reluctant but not really resistant."
+
+west_office:
+  name: "Dr. West's Office"
+  description_variants:
+    - >-
+      A small, obsessively tidy office. The only disorder is a single
+      drawer, forced open from the inside, its contents long since
+      removed by someone in a hurry.
+    - >-
+      Diplomas hang perfectly level. A framed photograph of a
+      graduating class has one face scratched out - not West's.
+  exits:
+    down:
+      target: library
+
+infirmary:
+  name: "The Infirmary"
+  description_variants:
+    - >-
+      A ward of a dozen beds, all but one empty and made with military
+      precision. The occupied one has restraints fixed to its frame
+      that look considerably newer than the bed itself.
+    - >-
+      Charts hang at the foot of each empty bed, patient names intact.
+      Several are marked, in the same clipped hand: DECEASED - RELEASED
+      TO FAMILY. No family is on file for any of them.
+  exits:
+    south:
+      target: quadrangle
+    east:
+      target: morgue
+    north:
+      target: cemetery
+
+morgue:
+  name: "The Morgue"
+  description_variants:
+    - >-
+      Drawers line one wall, most standing open and empty. The cold
+      here is mechanical, not seasonal, and it isn't quite doing its
+      job - something in the air says a body left recently, on its
+      own power.
+    - >-
+      An intake ledger records arrivals with clinical precision, and
+      departures with none at all. Several entries have no exit date,
+      only a small checkmark in the margin.
+  exits:
+    west:
+      target: infirmary
+    south:
+      target: anatomy_lab
+    down:
+      target: basement_laboratory
+      locked: true
+      unlock_item: lab_key
+      locked_text: "A service door in the floor is padlocked shut. Someone didn't want casual visitors."
+      unlock_text: "The padlock springs open more easily than its age would suggest - oiled recently, and often."
+  risk_multiplier: 1.6
+
+cemetery:
+  name: "The College Cemetery"
+  description_variants:
+    - >-
+      A small burial ground for unclaimed bodies and old faculty,
+      several plots freshly disturbed and just as carefully
+      re-covered - by someone who cared how it looked, not how it held.
+    - >-
+      Groundskeeper's tools lean against the fence, one shovel still
+      crusted with dirt from considerably deeper than a groundskeeper's
+      usual work requires.
+  exits:
+    south:
+      target: infirmary
+    east:
+      target: caretakers_cottage
+  scenery:
+    graves: >-
+      Three plots show the same signs: opened, emptied, and closed
+      again with real effort to make it look otherwise. None of the
+      three names on the headstones match anyone reported missing.
+
+caretakers_cottage:
+  name: "The Caretaker's Cottage"
+  description_variants:
+    - >-
+      A small cottage at the cemetery's edge. Whoever lived here left
+      in a hurry, or was made to. A half-eaten meal has gone to mold
+      on the table.
+    - >-
+      Newspaper clippings are pinned to one wall in a rough timeline,
+      all concerning disappearances - the caretaker's own private
+      investigation, running well ahead of anyone official.
+  exits:
+    west:
+      target: cemetery
+
+basement_laboratory:
+  name: "The Basement Laboratory"
+  description_variants:
+    - >-
+      A private laboratory that doesn't appear on any building plan,
+      built with real care and considerable expense. Whatever this
+      cost, someone thought the results were worth it.
+    - >-
+      Glassware and surgical tools are arranged with the same obsessive
+      order as the office upstairs. A ledger of trials sits open,
+      entries growing steadily less legible toward the end.
+  exits:
+    up:
+      target: morgue
+    down:
+      target: holding_cells
+  risk_multiplier: 1.9
+  scenery:
+    ledger: >-
+      Early entries are clinical and hopeful. Later ones grow shorter,
+      then stop describing results at all - only durations, as if
+      counting how long something stayed contained.
+
+holding_cells:
+  name: "The Holding Cells"
+  description_variants:
+    - >-
+      A row of reinforced cells, built into what used to be a coal
+      cellar. Every door stands open. None of them were opened from
+      the outside.
+    - >-
+      Scratches score the inside of each door, low down, at the height
+      of something that was crawling rather than standing. The newest
+      marks haven't finished healing into rust yet.
+  exits:
+    up:
+      target: basement_laboratory

@@ -1,0 +1,41 @@
+# Random events for the "reanimator" scenario.
+# Most are one-shot (default); two are marked repeat: true for ambient
+# dread that can recur across a longer playthrough.
+
+- id: something_scratching
+  rooms: [morgue, basement_laboratory]
+  chance: 0.4
+  text: "Something scratches at the inside of a drawer that should have nothing living - or dead - inside it."
+  sanity_effect: -10
+
+- id: cold_draft
+  rooms: [library, west_office]
+  chance: 0.3
+  text: "A cold draft moves through the room, though every window here is sealed shut."
+  sanity_effect: -5
+
+- id: shuffling_footsteps
+  rooms: [holding_cells, basement_laboratory]
+  chance: 0.25
+  text: "Footsteps shuffle somewhere close, dragging on one side, matching no gait you've heard from anything living."
+  sanity_effect: -5
+  repeat: true
+
+- id: campus_bell
+  rooms: [quadrangle, lecture_hall]
+  chance: 0.15
+  text: "A bell tolls the hour somewhere on campus, ordinary and mundane, and somehow worse for it."
+  sanity_effect: -5
+  repeat: true
+
+- id: disturbed_earth
+  rooms: [cemetery]
+  chance: 0.4
+  text: "A patch of earth shifts, just slightly, in a plot marked as already exhumed and closed."
+  sanity_effect: -10
+
+- id: patient_moan
+  rooms: [infirmary]
+  chance: 0.35
+  text: "The one occupied bed's restraints creak, though the ward's only living patient has been asleep the whole time you've been here."
+  sanity_effect: -10

@@ -1,0 +1,103 @@
+# Items for the "reanimator" scenario.
+# 2 keys, 8 clues (6 needed to win - see manifest.yaml), 1 curative.
+
+office_key:
+  name: "office key"
+  description: "A small brass key on a faculty ring, one name worn off the tag."
+  valid_rooms: [quadrangle, infirmary, cemetery]
+  on_take_sanity: -5
+  on_take_text: >-
+    Whoever's ring this was, they weren't planning to be away from it
+    for long. It was still warm when you found it.
+
+lab_key:
+  name: "laboratory key"
+  description: "A heavy iron key, out of place among the college's ordinary hardware."
+  valid_rooms: [morgue, anatomy_lab, caretakers_cottage]
+  on_take_sanity: -10
+  on_take_text: >-
+    It's been oiled recently, and often - someone used this door far
+    more than an official service entrance should ever need to be used.
+
+research_notes:
+  name: "research notes"
+  description: "A physician's private notes, methodical and increasingly unhinged."
+  valid_rooms: [west_office, library, lecture_hall]
+  on_take_sanity: -15
+  on_take_text: >-
+    "Freshness is the only variable that has ever mattered. Every
+    failure traces back to delay, never to the formula itself." The
+    handwriting doesn't waver once across a dozen pages of this.
+  is_clue: true
+
+exhumation_report:
+  name: "exhumation report"
+  description: "A groundskeeper's handwritten account of disturbed graves."
+  valid_rooms: [cemetery, caretakers_cottage, morgue]
+  on_take_sanity: -10
+  on_take_text: >-
+    Three graves, each reopened within a week of burial, each recovered
+    with real care - by someone who wanted the ground to look
+    undisturbed, not to actually leave it that way.
+  is_clue: true
+
+missing_persons_list:
+  name: "missing persons list"
+  description: "A list of local disappearances, dates annotated in a second hand."
+  valid_rooms: [caretakers_cottage, infirmary, quadrangle]
+  on_take_sanity: -10
+  on_take_text: >-
+    Every name on the list overlaps with a death recorded at this
+    college in the same month - and every one of those deaths is
+    marked "released to family" with no family on file.
+  is_clue: true
+
+reagent_vial:
+  name: "reagent vial"
+  description: "A small vial of luminous, faintly moving fluid."
+  valid_rooms: [anatomy_lab, basement_laboratory, morgue]
+  on_take_sanity: -15
+  on_take_text: >-
+    It's warmer than a liquid this color should be, and it doesn't
+    settle the way it should when you tilt it. You stop tilting it.
+  is_clue: true
+
+patient_chart:
+  name: "patient chart"
+  description: "A hospital chart for a patient who shouldn't still be a patient."
+  valid_rooms: [infirmary, morgue, west_office]
+  on_take_sanity: -10
+  on_take_text: >-
+    Admitted, treated, declared dead - and then, three days later, a
+    single addended note in different ink: "Discharged. Ambulatory."
+  is_clue: true
+
+prizefighters_effects:
+  name: "prizefighter's effects"
+  description: "A boxer's championship belt, found somewhere it has no reason to be."
+  valid_rooms: [holding_cells, basement_laboratory, cemetery]
+  on_take_sanity: -15
+  on_take_text: >-
+    "Iron Tom" Halloran, undefeated, dead of a ring injury and buried
+    with this belt at his own request. It should not be down here.
+  is_clue: true
+
+deans_memo:
+  name: "dean's memo"
+  description: "A private memo marked CONFIDENTIAL - NOT FOR THE FACULTY MEETING MINUTES."
+  valid_rooms: [west_office, library, quadrangle]
+  on_take_sanity: -10
+  on_take_text: >-
+    "Dr. West's funding continues at the trustees' insistence, against
+    my strong recommendation. I want it on record that I objected." It
+    is not, in fact, on any record you can find.
+  is_clue: true
+
+hip_flask:
+  name: "hip flask"
+  description: "A dented hip flask, more sentimental value than contents at this point."
+  valid_rooms: [caretakers_cottage, college_gates, quadrangle]
+  on_use_sanity: 20
+  on_use_text: >-
+    It's cheap whiskey and it's warm and it's exactly what you needed.
+    For a moment, the case feels like a case again, not a fate.
