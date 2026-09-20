@@ -6,3 +6,6 @@ venv/
 .idea/
 saves/
 *.sav
+build/
+dist/
+*.spec

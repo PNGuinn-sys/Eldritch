@@ -312,6 +312,16 @@ checks every shipped scenario as a whole: that random item placement can
 never soft-lock a run (across 100 seeds each), and that a bot can play each
 one from start to a win using real commands.
 
+### Building the Windows release
+```powershell
+pip install -r requirements-dev.txt      # one-time: adds PyInstaller
+.\build.ps1 -Version 0.3.0               # add -SkipTests to skip the test run
+```
+This runs the tests, builds `Eldritch.exe`, and packages it with `data/` and
+the README as `dist\Eldritch-<version>-windows.zip`, printing SHA-256 hashes
+for the release notes. `build/` and `dist/` are git-ignored. Publishing is a
+separate step, e.g. `gh release create v0.3.0 dist\Eldritch-0.3.0-windows.zip --prerelease`.
+
 ## How to Play
 
 | Command              | Effect                                    |
