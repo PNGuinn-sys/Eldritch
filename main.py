@@ -32,7 +32,22 @@ from game.sanity import distort, thresholds_from_dict
 from game.world import generate_events, generate_world
 
 PROJECT_ROOT = Path(__file__).resolve().parent
-DATA_DIR = PROJECT_ROOT / "data"
+
+
+def resolve_data_dir() -> Path:
+    """Where scenarios are loaded from. Running from source: data/ beside
+    main.py. Packaged .exe: a data/ folder sitting next to the exe wins, so
+    scenarios can be added or edited without rebuilding; if there isn't
+    one, fall back to the copy bundled inside the exe."""
+    if getattr(sys, "frozen", False):
+        external = Path(sys.executable).resolve().parent / "data"
+        if external.is_dir():
+            return external
+        return Path(getattr(sys, "_MEIPASS", PROJECT_ROOT)) / "data"
+    return PROJECT_ROOT / "data"
+
+
+DATA_DIR = resolve_data_dir()
 
 TURN_CONSUMING_VERBS = {"go", "look", "take", "drop", "use", "rest", "examine"}
 DEFAULT_REST_AMOUNT = 15

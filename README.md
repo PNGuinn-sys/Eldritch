@@ -203,6 +203,18 @@ Not yet started: `save_load.py`.
 ### Requirements
 - Python 3.10 or later
 
+### Windows release (no Python needed)
+
+Download `Eldritch-<version>-windows.zip` from the
+[Releases page](https://github.com/PNGuinn-sys/Eldritch/releases), unzip
+it, and double-click `Eldritch.exe`. Keep the `data/` folder next to the
+exe: that's where scenarios are loaded from, so you can add your own
+(see *Creating Your Own Scenario*) or edit existing ones with no
+rebuild. If `data/` is missing, the exe falls back to the copies bundled
+inside it. Windows SmartScreen or antivirus may warn about the exe
+because it isn't code-signed; the release notes list its SHA-256 so you
+can verify the download.
+
 ### Installation
 ```bash
 git clone https://github.com/PNGuinn-sys/Eldritch.git

@@ -1010,6 +1010,31 @@ def test_pause_if_packaged_only_prompts_when_frozen():
         game_main.pause_if_packaged()  # closed stdin must not crash
 
 
+def test_resolve_data_dir_prefers_folder_beside_exe_then_bundled():
+    import tempfile
+    from unittest.mock import patch
+
+    import main as game_main
+
+    # From source: data/ next to main.py.
+    assert game_main.resolve_data_dir() == PROJECT_ROOT / "data"
+
+    with tempfile.TemporaryDirectory() as d:
+        exe_dir, bundle = Path(d) / "app", Path(d) / "bundle"
+        (exe_dir).mkdir()
+        (bundle / "data").mkdir(parents=True)
+        fake_exe = str(exe_dir / "Eldritch.exe")
+
+        with patch.object(sys, "frozen", True, create=True), \
+             patch.object(sys, "executable", fake_exe), \
+             patch.object(sys, "_MEIPASS", str(bundle), create=True):
+            # No data/ beside the exe -> bundled fallback.
+            assert game_main.resolve_data_dir() == bundle / "data"
+            # Add one beside the exe -> it wins.
+            (exe_dir / "data").mkdir()
+            assert game_main.resolve_data_dir() == (exe_dir / "data").resolve()
+
+
 def run_all():
     tests = [v for k, v in globals().items() if k.startswith("test_")]
     for t in tests:
