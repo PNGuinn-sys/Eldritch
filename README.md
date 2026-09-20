@@ -158,6 +158,7 @@ eldritch/
 │   ├── sanity.py               # Sanity tiers & narration distortion
 │   ├── entities.py              # The stalking presence (dread system)
 │   ├── world.py                  # Resolves a scenario's templates into one playthrough
+│   ├── balance.py                 # Auto-scaling helpers for dread/sanity (written, not yet wired in)
 │   └── rng.py                     # Seeded RNG for reproducible randomness
 ├── data/                  # Adventure content lives here, not in code
 │   ├── manor/                # Scenario 1: "The Manor"
@@ -190,8 +191,8 @@ Not yet started: `save_load.py`.
 
 ### Installation
 ```bash
-git clone <repo-url>
-cd eldritch
+git clone https://github.com/PNGuinn-sys/Eldritch.git
+cd Eldritch
 pip install -r requirements.txt   # installs PyYAML
 ```
 
@@ -250,8 +251,10 @@ python tests/test_engine.py
 | `save` / `load`                       | Not wired up yet                        |
 | `quit`                                  | Exit the game                         |
 
-**Winning:** find all four clues hidden around the manor, then go `out`
-through the front door.
+**Winning:** collect enough clues to piece the scenario's story together
+(`status` shows your progress, e.g. "6 needed to leave"), then reach its
+exit — in the manor, that's going `out` through the front door. The
+necronomicon counts as +2 clues if you're willing to pay for reading it.
 **Losing:** your sanity reaches 0, or the presence catches you when it
 manifests and your next move isn't fleeing or hiding.
 
