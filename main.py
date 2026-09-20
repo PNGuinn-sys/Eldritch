@@ -29,6 +29,9 @@ from game.parser import parse
 from game.player import Player
 from game.rng import make_rng
 from game.sanity import distort, thresholds_from_dict
+from game.save_load import (
+    DEFAULT_SLOT, SaveError, apply_snapshot, normalize_slot, read_save, snapshot, write_save,
+)
 from game.world import generate_events, generate_world
 
 PROJECT_ROOT = Path(__file__).resolve().parent
@@ -48,6 +51,17 @@ def resolve_data_dir() -> Path:
 
 
 DATA_DIR = resolve_data_dir()
+
+
+def resolve_saves_dir() -> Path:
+    """Where save files live: a saves/ folder beside main.py, or beside the
+    exe when packaged (never inside the exe's temp extraction folder)."""
+    if getattr(sys, "frozen", False):
+        return Path(sys.executable).resolve().parent / "saves"
+    return PROJECT_ROOT / "saves"
+
+
+SAVES_DIR = resolve_saves_dir()
 
 TURN_CONSUMING_VERBS = {"go", "look", "take", "drop", "use", "rest", "examine"}
 DEFAULT_REST_AMOUNT = 15
@@ -195,9 +209,29 @@ def check_events(player: Player, rooms: dict, events: list, rng) -> None:
                 player.adjust_sanity(effect)
 
 
+def handle_save_load(cmd, player: Player, rooms: dict, events: list, rng, scenario) -> None:
+    """`save [name]` / `load [name]` - meta commands, not in-world actions:
+    they take no turn and work even while the presence is active."""
+    try:
+        slot = normalize_slot(cmd.target)
+        if cmd.verb == "save":
+            write_save(SAVES_DIR, slot, snapshot(scenario, rooms, events, player, rng))
+            print(f"Game saved as '{slot}'.")
+        else:
+            apply_snapshot(read_save(SAVES_DIR, slot), scenario, rooms, events, player, rng)
+            print(f"Loaded '{slot}'.")
+            describe_room(player, rooms, scenario, rng)
+    except SaveError as e:
+        print(e)
+
+
 def handle_command(cmd, player: Player, rooms: dict, events: list, rng, scenario) -> str:
     """Execute a parsed command. Returns one of:
     'continue', 'quit', 'win', 'caught', 'broken'."""
+    if cmd.verb in ("save", "load"):
+        handle_save_load(cmd, player, rooms, events, rng, scenario)
+        return "continue"
+
     room = rooms[player.location]
     just_evaded = False
 
@@ -365,9 +399,6 @@ def handle_command(cmd, player: Player, rooms: dict, events: list, rng, scenario
                     if not unlocked_anything:
                         print("Nothing happens.")
 
-    elif cmd.verb in ("save", "load"):
-        print("Saving isn't wired up yet - that's coming in a later step.")
-
     elif cmd.verb == "status":
         show_status(player, rooms, scenario)
 
@@ -387,7 +418,8 @@ def handle_command(cmd, player: Player, rooms: dict, events: list, rng, scenario
     elif cmd.verb == "help":
         print(
             "Commands: look, examine <thing>, go <direction>, take <item>, "
-            "drop <item>, use <item>, inventory, status, hide, rest, quit"
+            "drop <item>, use <item>, inventory, status, hide, rest, "
+            "save [name], load [name], quit"
         )
 
     elif cmd.verb == "unknown":
@@ -466,11 +498,26 @@ def main() -> None:
         "--show-seed", action="store_true",
         help="Print the seed used this run, for debugging",
     )
+    arg_parser.add_argument(
+        "--load", nargs="?", const=DEFAULT_SLOT, default=None, metavar="SLOT",
+        help=f"Resume a saved game (default slot: '{DEFAULT_SLOT}'); the save decides the scenario",
+    )
     args = arg_parser.parse_args()
 
     rng, seed = make_rng(args.seed)
 
-    if args.scenario:
+    save_data = None
+    if args.load:
+        try:
+            save_data = read_save(SAVES_DIR, normalize_slot(args.load))
+        except SaveError as e:
+            print(e, file=sys.stderr)
+            sys.exit(1)
+        scenario_id = save_data.get("scenario")
+        if args.scenario and args.scenario != scenario_id:
+            print(f"That save is for '{scenario_id}', not '{args.scenario}'.", file=sys.stderr)
+            sys.exit(1)
+    elif args.scenario:
         scenario_id = args.scenario
     else:
         print("=" * 60)
@@ -498,14 +545,24 @@ def main() -> None:
     )
     player.visited.add(player.location)
 
+    if save_data is not None:
+        try:
+            apply_snapshot(save_data, scenario, rooms, events, player, rng)
+        except SaveError as e:
+            print(e, file=sys.stderr)
+            sys.exit(1)
+
     print("=" * 60)
     print("ELDRITCH")
     print(scenario.title)
     print("=" * 60)
-    if args.show_seed:
-        print(f"[seed: {seed}]")
-    if scenario.intro:
-        print(f"\n{scenario.intro}")
+    if save_data is not None:
+        print(f"[resumed from '{normalize_slot(args.load)}']")
+    else:
+        if args.show_seed:
+            print(f"[seed: {seed}]")
+        if scenario.intro:
+            print(f"\n{scenario.intro}")
 
     describe_room(player, rooms, scenario, rng)
 

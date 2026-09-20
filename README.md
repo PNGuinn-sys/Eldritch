@@ -150,7 +150,10 @@ mid-playthrough.
 - **Fully re-skinnable per scenario** — sanity pool size, clue threshold,
   and the stalking threat's pacing/flavor text are all scenario-configurable,
   not hardcoded ✅
-- Save/load, more puzzles, additional endings — planned
+- **Save/load** — `save [name]` / `load [name]` at any time (even mid-encounter),
+  or resume from the command line with `--load [name]`. Saves keep the exact
+  world, your progress, and the RNG state, and survive prose edits to a scenario ✅
+- More puzzles, additional endings — planned
 - **Optional terminal styling** — color and light ASCII art — not started
 
 ## Tech Stack
@@ -172,6 +175,7 @@ eldritch/
 │   ├── sanity.py               # Sanity tiers & narration distortion
 │   ├── entities.py              # The stalking presence (dread system)
 │   ├── world.py                  # Resolves a scenario's templates into one playthrough
+│   ├── save_load.py               # Save/load: snapshots of a playthrough's changing state
 │   ├── balance.py                 # Auto-scales dread frequency & sanity costs to scenario size
 │   └── rng.py                     # Seeded RNG for reproducible randomness
 ├── data/                  # Adventure content lives here, not in code
@@ -196,7 +200,7 @@ Adding a new adventure means adding a new folder under `data/` with those
 same four files — the engine itself doesn't need to change. Run one with
 `python main.py --scenario <folder-name>`.
 
-Not yet started: `save_load.py`.
+Saves are written to a `saves/` folder next to `main.py` (or next to the exe).
 
 ## Getting Started
 
@@ -228,6 +232,7 @@ python main.py                                  # shows a scenario menu (see bel
 python main.py --scenario manor                  # skip the menu, load a specific one
 python main.py --scenario hollow_tide            # the other scenario, same way
 python main.py --seed 42 --show-seed            # a reproducible run, for testing
+python main.py --load                            # resume your 'quicksave' (or --load <name>)
 ```
 
 Running with no `--scenario` shows a menu of every scenario found under
@@ -274,7 +279,7 @@ python tests/test_engine.py
 | `status` / `stats`                | Location, sanity, inventory, clue & room progress |
 | `hide` / `wait`                     | Evade the threat when it manifests        |
 | `rest` / `recover`                    | Recover sanity, in a room marked safe     |
-| `save` / `load`                       | Not wired up yet                        |
+| `save [name]` / `load [name]`         | Save or restore your game (default slot `quicksave`); takes no turn |
 | `quit`                                  | Exit the game                         |
 
 **Winning:** collect enough clues to piece the scenario's story together
@@ -309,7 +314,7 @@ manifests and your next move isn't fleeing or hiding.
       `examine <thing>` (item descriptions + room scenery text, no
       new items required) and repeatable ambient events (vs. one-shot
       story beats)
-- [ ] Save/load system
+- [x] Save/load system
 - [ ] More rooms, more clues, more puzzles in either scenario
 - [ ] Additional/varied endings beyond win/caught/broken
 - [ ] Polish — styling, pacing

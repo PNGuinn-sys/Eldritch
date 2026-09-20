@@ -1035,6 +1035,231 @@ def test_resolve_data_dir_prefers_folder_beside_exe_then_bundled():
             assert game_main.resolve_data_dir() == (exe_dir / "data").resolve()
 
 
+# --- Save / load ------------------------------------------------------------------
+
+def _fresh_game(scenario, seed=1):
+    from game.player import Player
+    from game.sanity import thresholds_from_dict
+    rng, _ = make_rng(seed)
+    rooms = generate_world(scenario, rng)
+    events = generate_events(scenario, rng)
+    player = Player(location=scenario.start_room, sanity=scenario.max_sanity,
+                    max_sanity=scenario.max_sanity,
+                    tier_thresholds=thresholds_from_dict(scenario.sanity_tier_thresholds))
+    player.visited.add(player.location)
+    return player, rooms, events, rng
+
+
+def _quiet(fn, *args, **kwargs):
+    import io
+    from contextlib import redirect_stdout
+    buf = io.StringIO()
+    with redirect_stdout(buf):
+        result = fn(*args, **kwargs)
+    return result, buf.getvalue()
+
+
+def test_save_snapshot_roundtrips_through_json_and_restores_everything():
+    import json
+    from game.save_load import apply_snapshot, snapshot
+
+    player, rooms, events, rng = _fresh_game(MANOR_SCENARIO, seed=3)
+    # Dirty up the state: move, pick up, drop, use, lose sanity, fire an event.
+    player.location = "corridor"
+    player.visited.update({"corridor", "study"})
+    player.add_item("brass_key")
+    player.adjust_sanity(-33)
+    player.dread = 2
+    player.bonus_clues = 2
+    player.necronomicon_read = True
+    rooms["corridor"]["exits"]["down"]["locked"] = False
+    events[0]["fired"] = True
+    rooms["foyer"]["items"].append("silver_locket")
+    rng.random(); rng.random()
+
+    saved = json.loads(json.dumps(snapshot(MANOR_SCENARIO, rooms, events, player, rng)))
+
+    player2, rooms2, events2, rng2 = _fresh_game(MANOR_SCENARIO, seed=999)  # different world
+    apply_snapshot(saved, MANOR_SCENARIO, rooms2, events2, player2, rng2)
+
+    for f in ("location", "sanity", "max_sanity", "inventory", "dread", "presence_active",
+              "bonus_clues", "necronomicon_read", "regeneration_disabled"):
+        assert getattr(player2, f) == getattr(player, f), f
+    assert player2.visited == player.visited and isinstance(player2.visited, set)
+    assert player2.tier_thresholds == player.tier_thresholds  # derived, not clobbered
+    for room_id in rooms:
+        assert rooms2[room_id]["items"] == rooms[room_id]["items"], room_id
+        assert rooms2[room_id]["description"] == rooms[room_id]["description"], room_id
+        for d, info in rooms[room_id]["exits"].items():
+            assert rooms2[room_id]["exits"][d].get("locked") == info.get("locked"), (room_id, d)
+    assert [e.get("fired") for e in events2] == [e.get("fired") for e in events]
+    assert [rng2.random() for _ in range(5)] == [rng.random() for _ in range(5)]  # dice continue identically
+
+
+def test_save_and_load_commands_restore_state_mid_game():
+    import tempfile
+    from unittest.mock import patch
+    import main as game_main
+
+    player, rooms, events, rng = _fresh_game(MANOR_SCENARIO, seed=5)
+    with tempfile.TemporaryDirectory() as d, patch.object(game_main, "SAVES_DIR", Path(d)):
+        _, out = _quiet(game_main.handle_command, parse("save"), player, rooms, events, rng, MANOR_SCENARIO)
+        assert "saved as 'quicksave'" in out
+        assert (Path(d) / "quicksave.json").exists()
+
+        player.location = "corridor"
+        player.adjust_sanity(-40)
+        outcome, out = _quiet(game_main.handle_command, parse("load"), player, rooms, events, rng, MANOR_SCENARIO)
+        assert outcome == "continue"
+        assert player.location == "foyer" and player.sanity == MANOR_SCENARIO.max_sanity
+        assert "Loaded 'quicksave'" in out and rooms["foyer"]["name"] in out  # shows the room again
+
+
+def test_named_slots_are_independent():
+    import tempfile
+    from unittest.mock import patch
+    import main as game_main
+
+    player, rooms, events, rng = _fresh_game(MANOR_SCENARIO, seed=5)
+    with tempfile.TemporaryDirectory() as d, patch.object(game_main, "SAVES_DIR", Path(d)):
+        _quiet(game_main.handle_command, parse("save early"), player, rooms, events, rng, MANOR_SCENARIO)
+        player.adjust_sanity(-50)
+        _quiet(game_main.handle_command, parse("save Late"), player, rooms, events, rng, MANOR_SCENARIO)  # case-folded
+        _quiet(game_main.handle_command, parse("load early"), player, rooms, events, rng, MANOR_SCENARIO)
+        assert player.sanity == MANOR_SCENARIO.max_sanity
+        _quiet(game_main.handle_command, parse("load late"), player, rooms, events, rng, MANOR_SCENARIO)
+        assert player.sanity == MANOR_SCENARIO.max_sanity - 50
+
+
+def test_save_and_load_take_no_turn_and_work_while_presence_is_active():
+    import tempfile
+    from unittest.mock import patch
+    import main as game_main
+
+    class AlwaysHitsRandom:
+        def random(self):
+            return 0.0
+
+        def getstate(self):
+            return (3, tuple([0] * 625), None)
+
+        def setstate(self, state):
+            pass
+
+    player, rooms, events, _ = _fresh_game(MANOR_SCENARIO, seed=5)
+    player.presence_active = True
+    player.dread = 3
+    with tempfile.TemporaryDirectory() as d, patch.object(game_main, "SAVES_DIR", Path(d)):
+        outcome, _ = _quiet(game_main.handle_command, parse("save"), player, rooms, events, AlwaysHitsRandom(), MANOR_SCENARIO)
+        assert outcome == "continue"  # not 'caught'
+        outcome, _ = _quiet(game_main.handle_command, parse("load"), player, rooms, events, AlwaysHitsRandom(), MANOR_SCENARIO)
+        assert outcome == "continue"
+    assert player.presence_active is True  # the saved state was mid-presence; still must evade
+
+    # And a safe-turn check: saving never advances dread.
+    player2, rooms2, events2, _ = _fresh_game(MANOR_SCENARIO, seed=5)
+    with tempfile.TemporaryDirectory() as d, patch.object(game_main, "SAVES_DIR", Path(d)):
+        for _ in range(5):
+            _quiet(game_main.handle_command, parse("save"), player2, rooms2, events2, AlwaysHitsRandom(), MANOR_SCENARIO)
+    assert player2.dread == 0
+
+
+def test_load_refusals_leave_the_game_untouched():
+    import json
+    import tempfile
+    from unittest.mock import patch
+    import main as game_main
+    from game.save_load import SaveError, apply_snapshot, snapshot
+
+    player, rooms, events, rng = _fresh_game(MANOR_SCENARIO, seed=5)
+    good = snapshot(MANOR_SCENARIO, rooms, events, player, rng)
+    hollow = load_scenario(PROJECT_ROOT / "data" / "hollow_tide")
+
+    def refused(data, scenario=MANOR_SCENARIO):
+        p, r, e, g = _fresh_game(scenario, seed=8)
+        before = (p.location, p.sanity, {k: list(v["items"]) for k, v in r.items()}, g.getstate())
+        try:
+            apply_snapshot(data, scenario, r, e, p, g)
+        except SaveError as err:
+            assert (p.location, p.sanity, {k: list(v["items"]) for k, v in r.items()}, g.getstate()) == before
+            return str(err)
+        raise AssertionError("expected SaveError")
+
+    assert "belongs to" in refused(good, hollow)                                   # wrong scenario
+    assert "changed" in refused(dict(good, fingerprint="deadbeef"))                # structure changed
+    assert "incompatible" in refused(dict(good, version=99))                       # future version
+    assert "damaged" in refused({k: v for k, v in good.items() if k != "rng"})     # missing field
+    bad_room = json.loads(json.dumps(good)); bad_room["rooms"]["nowhere"] = {"description": "x", "items": [], "locked": {}}
+    assert "unknown room" in refused(bad_room)
+    bad_item = json.loads(json.dumps(good)); bad_item["rooms"]["foyer"]["items"] = ["ghost_item"]
+    assert "unknown item" in refused(bad_item)
+    bad_loc = json.loads(json.dumps(good)); bad_loc["player"]["location"] = "nowhere"
+    assert "unknown room" in refused(bad_loc)
+
+
+def test_load_messages_for_missing_bad_and_corrupt_saves():
+    import tempfile
+    from unittest.mock import patch
+    import main as game_main
+
+    player, rooms, events, rng = _fresh_game(MANOR_SCENARIO, seed=5)
+    with tempfile.TemporaryDirectory() as d, patch.object(game_main, "SAVES_DIR", Path(d)):
+        run = lambda line: _quiet(game_main.handle_command, parse(line), player, rooms, events, rng, MANOR_SCENARIO)[1]
+        assert "no saves yet" in run("load")
+        run("save alpha")
+        assert "alpha" in run("load beta")                    # lists what exists
+        assert "letters, numbers" in run("save ../evil")       # no path tricks
+        assert "letters, numbers" in run("load a b")
+        (Path(d) / "broken.json").write_text("{not json", encoding="utf-8")
+        assert "damaged" in run("load broken")
+        assert not list(Path(d).glob("*.tmp"))                 # no leftover temp files
+
+
+def test_prose_edits_do_not_invalidate_a_save_but_structural_ones_do():
+    import copy
+    from game.save_load import content_fingerprint
+
+    edited = copy.deepcopy(MANOR_SCENARIO)
+    edited.rooms["foyer"]["description_variants"] = ["Completely rewritten prose."]
+    edited.items["brass_key"]["description"] = "New text."
+    assert content_fingerprint(edited) == content_fingerprint(MANOR_SCENARIO)
+
+    extended = copy.deepcopy(MANOR_SCENARIO)
+    extended.rooms["new_room"] = {"name": "N", "description_variants": ["x"], "exits": {}}
+    assert content_fingerprint(extended) != content_fingerprint(MANOR_SCENARIO)
+
+
+def test_cli_load_resumes_a_saved_game_end_to_end():
+    import subprocess
+    import tempfile
+
+    with tempfile.TemporaryDirectory() as d:
+        # Run from a copy of main so its saves/ folder lands in the temp dir, not the repo.
+        env = dict(os.environ, PYTHONPATH=str(PROJECT_ROOT))
+        driver = (
+            "import sys, main; from pathlib import Path; main.SAVES_DIR = Path(sys.argv[1]); "
+            "sys.argv = ['main'] + sys.argv[2:]; main.main()"
+        )
+        def run(args, text):
+            return subprocess.run([sys.executable, "-c", driver, d, *args], input=text, text=True,
+                                  capture_output=True, cwd=str(PROJECT_ROOT), env=env, timeout=60)
+
+        first = run(["--scenario", "manor", "--seed", "4"], "go north\nsave trip\nquit\n")
+        assert first.returncode == 0 and "saved as 'trip'" in first.stdout
+
+        resumed = run(["--load", "trip"], "look\nquit\n")
+        assert resumed.returncode == 0, resumed.stderr
+        assert "resumed from 'trip'" in resumed.stdout
+        assert "The Manor" in resumed.stdout
+        assert "You don't remember agreeing to come here" not in resumed.stdout  # no intro on resume
+        assert "Corridor" in resumed.stdout                                       # standing where we saved
+
+        wrong = run(["--load", "trip", "--scenario", "hollow_tide"], "")
+        assert wrong.returncode == 1 and "not 'hollow_tide'" in wrong.stderr
+        missing = run(["--load", "nope"], "")
+        assert missing.returncode == 1 and "No save named 'nope'" in missing.stderr
+
+
 def run_all():
     tests = [v for k, v in globals().items() if k.startswith("test_")]
     for t in tests:
