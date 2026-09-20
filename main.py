@@ -507,5 +507,20 @@ def main() -> None:
         running = outcome == "continue"
 
 
+def pause_if_packaged() -> None:
+    """In the packaged .exe, a double-click opens a console that closes the
+    instant the game ends - hiding the ending (or any startup error).
+    Hold it open until Enter. No-op when run normally via `python main.py`."""
+    if not getattr(sys, "frozen", False):
+        return
+    try:
+        input("\nPress Enter to exit...")
+    except (EOFError, KeyboardInterrupt):
+        pass
+
+
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    finally:
+        pause_if_packaged()

@@ -994,6 +994,22 @@ def test_dread_scale_lowers_presence_chance_in_engine():
     assert dread_after_one_look(0.5) == 0
 
 
+def test_pause_if_packaged_only_prompts_when_frozen():
+    import main as game_main
+    from unittest.mock import patch
+
+    with patch("builtins.input") as fake_input:
+        game_main.pause_if_packaged()  # normal run: must not block
+        fake_input.assert_not_called()
+
+    with patch.object(sys, "frozen", True, create=True), patch("builtins.input") as fake_input:
+        game_main.pause_if_packaged()
+        fake_input.assert_called_once()
+
+    with patch.object(sys, "frozen", True, create=True), patch("builtins.input", side_effect=EOFError):
+        game_main.pause_if_packaged()  # closed stdin must not crash
+
+
 def run_all():
     tests = [v for k, v in globals().items() if k.startswith("test_")]
     for t in tests:
