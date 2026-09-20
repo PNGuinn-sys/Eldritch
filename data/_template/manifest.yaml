@@ -64,6 +64,28 @@ intro: >-                          # optional - shown once, before the first roo
 #   evade_text: "..."                 # shown if you flee successfully
 #   hide_text: "..."                   # shown if you hide successfully
 
+# --- Chapters (optional) - for a longer, multi-part story ---
+#
+# Define chapters here, then give rooms `chapter: <id>` in rooms.yaml.
+# Entering a room in a new chapter prints its title and intro. A chapter's
+# `threat` overrides the scenario-wide one (merged over it) for its rooms.
+# In rooms.yaml an exit can also use:
+#   travel_text: "..."        # printed as you cross it
+#   requires_clues: 4         # knowledge gate (needs a target)
+#   finale: [ {min_clues: 8, text: "...", result: win},
+#             {min_clues: 5, text: "...", result: win},
+#             {text: "...", result: lose} ]   # tiered ending (no target)
+#
+# chapters:
+#   one:
+#     title: "Part I: The Beginning"
+#     intro: "..."
+#   two:
+#     title: "Part II: The End"
+#     intro: "..."
+#     threat:
+#       caught_text: "..."
+
 # --- Custom win/loss text (optional - omit for the engine defaults) ---
 # win_text: "..."
 # broken_text: "..."          # shown if sanity hits 0

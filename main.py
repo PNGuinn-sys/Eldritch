@@ -140,6 +140,40 @@ def has_enough_clues(player: Player, scenario) -> bool:
     return required > 0 and found >= required
 
 
+def gate_unmet(exit_info: dict, player: Player, scenario) -> bool:
+    """True if an exit has a requires_clues knowledge gate the player
+    hasn't met yet."""
+    needed = exit_info.get("requires_clues")
+    return bool(needed) and clue_progress(player, scenario)[0] < needed
+
+
+def run_finale(finale: list, player: Player, scenario) -> str:
+    """Play the first ending in `finale` whose min_clues the player meets
+    (the validator guarantees the last entry is an unconditional
+    fallback). Returns that ending's result: 'win' or 'lose'."""
+    found = clue_progress(player, scenario)[0]
+    for entry in finale:
+        if found >= entry.get("min_clues", 0):
+            print(f"\n{entry['text']}")
+            return entry["result"]
+    return "lose"  # unreachable for a validated scenario
+
+
+def announce_chapter(player: Player, room: dict, scenario) -> None:
+    """Print a chapter banner when the player first enters a room belonging
+    to a different chapter than the last one announced."""
+    chapter_id = room.get("chapter")
+    if not chapter_id or chapter_id == player.chapter:
+        return
+    player.chapter = chapter_id
+    chapter = scenario.chapters.get(chapter_id, {})
+    print("\n" + "=" * 60)
+    print(chapter.get("title", chapter_id))
+    print("=" * 60)
+    if chapter.get("intro"):
+        print(f"\n{chapter['intro'].strip()}")
+
+
 def describe_room(player: Player, rooms: dict, scenario, rng) -> None:
     room = rooms[player.location]
     text = distort(room["description"], player.sanity, rng, player.max_sanity, player.tier_thresholds)
@@ -154,6 +188,8 @@ def describe_room(player: Player, rooms: dict, scenario, rng) -> None:
     for direction, info in room["exits"].items():
         if info.get("locked"):
             exit_labels.append(f"{direction} (locked)")
+        elif gate_unmet(info, player, scenario):
+            exit_labels.append(f"{direction} (not ready)")
         elif "target" not in info:
             exit_labels.append(direction)  # e.g. the win exit - no room to reveal
         elif info["target"] in player.visited:
@@ -174,6 +210,8 @@ def show_status(player: Player, rooms: dict, scenario) -> None:
 
     print("\n" + "-" * 40)
     print(f"Location: {room['name']}")
+    if player.chapter and player.chapter in scenario.chapters:
+        print(f"Chapter: {scenario.chapters[player.chapter].get('title', player.chapter)}")
     print(f"Sanity: {player.sanity}/{player.max_sanity} ({player.sanity_tier.value})")
 
     if player.inventory:
@@ -227,7 +265,7 @@ def handle_save_load(cmd, player: Player, rooms: dict, events: list, rng, scenar
 
 def handle_command(cmd, player: Player, rooms: dict, events: list, rng, scenario) -> str:
     """Execute a parsed command. Returns one of:
-    'continue', 'quit', 'win', 'caught', 'broken'."""
+    'continue', 'quit', 'win', 'lose' (a losing finale), 'caught', 'broken'."""
     if cmd.verb in ("save", "load"):
         handle_save_load(cmd, player, rooms, events, rng, scenario)
         return "continue"
@@ -239,6 +277,7 @@ def handle_command(cmd, player: Player, rooms: dict, events: list, rng, scenario
     # another room or hide - anything else, including looking around or
     # checking your inventory, means you're caught.
     if player.presence_active:
+        threat = scenario.threat_for(room)
         if cmd.verb == "quit":
             print("\nYou step back from the threshold. Some things are better left unseen.")
             return "quit"
@@ -246,7 +285,7 @@ def handle_command(cmd, player: Player, rooms: dict, events: list, rng, scenario
         if cmd.verb == "hide":
             resolve_evasion(player)
             just_evaded = True
-            print(scenario.threat.get("hide_text") or DEFAULT_HIDE_TEXT)
+            print(threat.get("hide_text") or DEFAULT_HIDE_TEXT)
             return "continue"
 
         can_flee = (
@@ -255,14 +294,16 @@ def handle_command(cmd, player: Player, rooms: dict, events: list, rng, scenario
             and cmd.direction in room["exits"]
             and not room["exits"][cmd.direction].get("locked")
             and not room["exits"][cmd.direction].get("requires_all_clues")
+            and not room["exits"][cmd.direction].get("finale")
+            and not gate_unmet(room["exits"][cmd.direction], player, scenario)
         )
         if can_flee:
             resolve_evasion(player)
             just_evaded = True
-            print(scenario.threat.get("evade_text") or DEFAULT_EVADE_TEXT)
+            print(threat.get("evade_text") or DEFAULT_EVADE_TEXT)
             # Fall through to the normal 'go' handling below.
         else:
-            print(scenario.threat.get("caught_text") or DEFAULT_CAUGHT_TEXT)
+            print(threat.get("caught_text") or DEFAULT_CAUGHT_TEXT)
             return "caught"
 
     if cmd.verb == "quit":
@@ -299,16 +340,23 @@ def handle_command(cmd, player: Player, rooms: dict, events: list, rng, scenario
             print("You can't go that way.")
         else:
             exit_info = room["exits"][direction]
-            if exit_info.get("requires_all_clues"):
+            if exit_info.get("finale"):
+                return run_finale(exit_info["finale"], player, scenario)
+            elif exit_info.get("requires_all_clues"):
                 if has_enough_clues(player, scenario):
                     print(scenario.win_text or DEFAULT_WIN_TEXT)
                     return "win"
                 print(exit_info.get("locked_text", "That way is blocked."))
             elif exit_info.get("locked"):
                 print(exit_info.get("locked_text", "That way is locked."))
+            elif gate_unmet(exit_info, player, scenario):
+                print(exit_info.get("locked_text", "You aren't ready for that yet."))
             else:
+                if exit_info.get("travel_text"):
+                    print(f"\n{exit_info['travel_text'].strip()}")
                 player.location = exit_info["target"]
                 player.visited.add(player.location)
+                announce_chapter(player, rooms[player.location], scenario)
                 describe_room(player, rooms, scenario, rng)
                 check_events(player, rooms, events, rng)
 
@@ -432,8 +480,9 @@ def handle_command(cmd, player: Player, rooms: dict, events: list, rng, scenario
         current_room = rooms[player.location]  # re-fetch: 'go' may have just moved the player
         if not current_room.get("safe"):
             risk_multiplier = current_room.get("risk_multiplier", 1.0) * scenario.dread_scale
-            if advance_dread(player, rng, scenario.threat, risk_multiplier):
-                print(scenario.threat.get("manifest_text") or DEFAULT_PRESENCE_MANIFEST_TEXT)
+            threat = scenario.threat_for(current_room)
+            if advance_dread(player, rng, threat, risk_multiplier):
+                print(threat.get("manifest_text") or DEFAULT_PRESENCE_MANIFEST_TEXT)
 
     if player.sanity <= 0:
         print(scenario.broken_text or DEFAULT_BROKEN_TEXT)
@@ -564,6 +613,7 @@ def main() -> None:
         if scenario.intro:
             print(f"\n{scenario.intro}")
 
+    announce_chapter(player, rooms[player.location], scenario)
     describe_room(player, rooms, scenario, rng)
 
     running = True

@@ -65,11 +65,12 @@ start from something bigger. Every scenario needs the same four files:
 | `items.yaml`            | Each item: `name`, `valid_rooms` (list — one picked at random); optional `description` (shown by `examine`), `on_take_sanity`, `on_take_text`, `is_clue`, `on_use_sanity`, `on_use_text` |
 | `events.yaml`             | List of random events: `id`, `rooms`, `chance`, `text`; optional `sanity_effect`, `repeat` (default false — a one-shot event; `true` lets it recur, for ambient flavor) |
 
-Exits come in three shapes: a normal `{target: room_id}`, a locked one
-(`locked: true`, `unlock_item`, `locked_text`, `unlock_text`), or the
-win exit (`requires_all_clues: true`, no target — see `clues_required`
+Exits come in a few shapes: a normal `{target: room_id}`, a locked one
+(`locked: true`, `unlock_item`, `locked_text`, `unlock_text`), a knowledge-
+gated one (`requires_clues`), the win exit (`requires_all_clues: true`, no
+target — see `clues_required` below), or a tiered `finale` (see *Chapters*
 below). If any item has `is_clue: true`, some exit needs
-`requires_all_clues: true`, and vice versa — the game won't start if
+`requires_all_clues: true` (or a `finale`), and vice versa — the game won't start if
 that's out of balance.
 
 **Scaling a bigger scenario** — optional `manifest.yaml` fields:
@@ -94,6 +95,28 @@ directions: a *small* scenario is scaled up (a 2-room one gets the full
 as authored". Manor, Hollow Tide and The Reagent were hand-tuned and are
 pinned to `1.0` — delete those lines after extending one to let it
 auto-scale.
+
+**Chapters, knowledge gates & tiered endings** — for a long, multi-part
+story (think *The Call of Cthulhu*: several places, then a finale).
+
+- `chapters:` in the manifest defines them: `{id: {title, intro, threat}}`.
+  A room opts in with `chapter: <id>`; entering a room in a new chapter
+  prints its banner (title + intro), and `status` shows the current one.
+  "One-way" travel is just leaving out the return exit. An exit's
+  `travel_text` is printed as you cross it (a train pulling out, a ship
+  putting to sea).
+- `requires_clues: N` on a normal exit (with a `target`) is a knowledge
+  gate: it shows as `(not ready)` and refuses you, using `locked_text`,
+  until you hold N clues. It isn't an escape route from the presence.
+- `finale:` on an exit (no `target`) is a tiered ending: a list of
+  `{min_clues, text, result: win|lose}` checked top to bottom, highest
+  `min_clues` first, the last entry having no `min_clues` as the fallback.
+  So "seal it fully / seal it at a cost / fail" is one action whose result
+  depends on how much you learned. Existing `requires_all_clues` exits keep
+  working unchanged.
+- A chapter's `threat:` block overrides the scenario-wide one for rooms in
+  that chapter, merging over it, so a chapter can change just the flavor
+  text, or the pacing too.
 
 **Recovery** — a room with `safe: true` can be rested in (`rest`/`recover`,
 restores `rest_amount`, default 15); an item with `on_use_sanity` is a

@@ -3,7 +3,7 @@ Player state for Eldritch: location, sanity, and inventory.
 """
 
 from dataclasses import dataclass, field
-from typing import List, Set
+from typing import List, Optional, Set
 
 from game.sanity import tier_for, SanityTier
 
@@ -24,6 +24,7 @@ class Player:
     bonus_clues: int = 0
     necronomicon_read: bool = False
     regeneration_disabled: bool = False
+    chapter: Optional[str] = None  # id of the chapter last announced, if the scenario has any
 
     @property
     def sanity_tier(self) -> SanityTier:

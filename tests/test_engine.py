@@ -1260,6 +1260,239 @@ def test_cli_load_resumes_a_saved_game_end_to_end():
         assert missing.returncode == 1 and "No save named 'nope'" in missing.stderr
 
 
+# --- Chapters: knowledge gates, travel text, tiered endings, per-chapter threats ---
+
+class _NoDread:
+    """RNG stub that never rolls a hit (no dread, no events)."""
+    def random(self):
+        return 0.99
+
+
+class _AlwaysDread:
+    """RNG stub that always rolls a hit."""
+    def random(self):
+        return 0.0
+
+
+def _chapter_game(tmp, manifest_extra="", finale=None, gate=2):
+    """A tiny two-chapter scenario loaded through the real loader:
+    room a (chapter one) --gate--> room b (chapter two, with the finale)."""
+    import yaml
+    finale = finale if finale is not None else [
+        {"min_clues": 3, "text": "SEALED", "result": "win"},
+        {"min_clues": 2, "text": "HALF-SEALED", "result": "win"},
+        {"text": "DOOM", "result": "lose"},
+    ]
+    tmp.mkdir(parents=True, exist_ok=True)
+    manifest = (
+        "title: Chapters\nstart_room: a\ndread_scale: 1.0\nsanity_scale: 1.0\n"
+        "chapters:\n"
+        "  one: {title: 'Part I', intro: 'First.'}\n"
+        "  two:\n"
+        "    title: 'Part II'\n"
+        "    intro: 'Second.'\n"
+        "    threat:\n"
+        "      threshold: 2\n"
+        "      caught_text: 'R-LYEH TAKES YOU'\n"
+    ) + manifest_extra
+    rooms = {
+        "a": {"name": "Room A", "description_variants": ["A."], "chapter": "one", "exits": {
+            "north": {"target": "b", "requires_clues": gate,
+                      "locked_text": "You don't know enough.", "travel_text": "The train pulls out."}}},
+        "b": {"name": "Room B", "description_variants": ["B."], "chapter": "two", "exits": {
+            "south": {"target": "a"}, "down": {"finale": finale}}},
+    }
+    items = {f"c{i}": {"name": f"clue {i}", "valid_rooms": ["a"], "is_clue": True} for i in range(1, 4)}
+    (tmp / "manifest.yaml").write_text(manifest, encoding="utf-8")
+    (tmp / "rooms.yaml").write_text(yaml.safe_dump(rooms), encoding="utf-8")
+    (tmp / "items.yaml").write_text(yaml.safe_dump(items), encoding="utf-8")
+    (tmp / "events.yaml").write_text("[]", encoding="utf-8")
+    scenario = load_scenario(tmp)
+    player, rooms_, events, rng = _fresh_game(scenario, seed=1)
+    return scenario, player, rooms_, events
+
+
+def _step(scenario, player, rooms, events, line, rng=None):
+    return _quiet(__import__("main").handle_command, parse(line), player, rooms, events,
+                  rng or _NoDread(), scenario)
+
+
+def test_requires_clues_gate_blocks_travel_until_enough_knowledge():
+    import tempfile
+    import main as game_main
+    with tempfile.TemporaryDirectory() as d:
+        scenario, player, rooms, events = _chapter_game(Path(d) / "s")
+        player.bonus_clues = 1
+        _, out = _quiet(game_main.describe_room, player, rooms, scenario, _NoDread())
+        assert "north (not ready)" in out
+        outcome, out = _step(scenario, player, rooms, events, "go north")
+        assert outcome == "continue" and player.location == "a"
+        assert "You don't know enough." in out
+
+        player.bonus_clues = 2
+        _, out = _quiet(game_main.describe_room, player, rooms, scenario, _NoDread())
+        assert "not ready" not in out
+        _step(scenario, player, rooms, events, "go north")
+        assert player.location == "b"
+
+
+def test_travel_text_and_chapter_banner_print_once_in_order():
+    import tempfile
+    import main as game_main
+    with tempfile.TemporaryDirectory() as d:
+        scenario, player, rooms, events = _chapter_game(Path(d) / "s")
+        _, out = _quiet(game_main.announce_chapter, player, rooms["a"], scenario)
+        assert "Part I" in out and "First." in out and player.chapter == "one"
+        _, again = _quiet(game_main.announce_chapter, player, rooms["a"], scenario)
+        assert again == ""  # same chapter: no repeat banner
+
+        player.bonus_clues = 2
+        _, out = _step(scenario, player, rooms, events, "go north")
+        assert out.index("The train pulls out.") < out.index("Part II") < out.index("Room B")
+        assert "Second." in out and player.chapter == "two"
+
+        _, out = _step(scenario, player, rooms, events, "go south")   # back into chapter one
+        assert "Part I" in out
+        _, status = _quiet(game_main.show_status, player, rooms, scenario)
+        assert "Chapter: Part I" in status
+
+
+def test_finale_picks_the_ending_by_clue_count():
+    import tempfile
+    cases = [(3, "win", "SEALED"), (5, "win", "SEALED"), (2, "win", "HALF-SEALED"), (0, "lose", "DOOM")]
+    with tempfile.TemporaryDirectory() as d:
+        for n, (clues, result, text) in enumerate(cases):
+            scenario, player, rooms, events = _chapter_game(Path(d) / f"s{n}")
+            player.location = "b"
+            player.bonus_clues = clues
+            outcome, out = _step(scenario, player, rooms, events, "go down")
+            assert outcome == result, (clues, outcome)
+            assert text in out and (text != "SEALED" or "HALF" not in out), (clues, out)
+
+
+def test_finale_and_unmet_gates_are_not_escape_routes():
+    import tempfile
+    with tempfile.TemporaryDirectory() as d:
+        scenario, player, rooms, events = _chapter_game(Path(d) / "s")
+        player.location = "b"
+        player.bonus_clues = 3
+        player.presence_active = True
+        outcome, _ = _step(scenario, player, rooms, events, "go down")   # finale can't be fled through
+        assert outcome == "caught"
+
+        scenario2, player2, rooms2, events2 = _chapter_game(Path(d) / "s2")
+        player2.bonus_clues = 0
+        player2.presence_active = True
+        outcome, _ = _step(scenario2, player2, rooms2, events2, "go north")  # gated exit can't either
+        assert outcome == "caught"
+
+
+def test_chapter_threat_overrides_merge_over_the_scenario_threat():
+    import tempfile
+    with tempfile.TemporaryDirectory() as d:
+        scenario, player, rooms, events = _chapter_game(Path(d) / "s")
+    one, two = scenario.chapter_threats["one"], scenario.chapter_threats["two"]
+    assert one == scenario.threat                       # no override -> unchanged
+    assert two["threshold"] == 2 and two["caught_text"] == "R-LYEH TAKES YOU"
+    assert two["chance_by_tier"] == scenario.threat["chance_by_tier"]   # unspecified keys inherited
+    assert two["hide_text"] == scenario.threat["hide_text"]
+    assert scenario.threat_for(rooms["b"]) is two and scenario.threat_for(rooms["a"]) is one
+
+
+def test_chapter_threat_changes_flavor_and_pacing_in_the_engine():
+    import tempfile
+    with tempfile.TemporaryDirectory() as d:
+        scenario, player, rooms, events = _chapter_game(Path(d) / "s")
+        player.presence_active = True
+        outcome, out = _step(scenario, player, rooms, events, "look")          # chapter one: default text
+        assert outcome == "caught" and "R-LYEH" not in out
+
+        scenario, player, rooms, events = _chapter_game(Path(d) / "s2")
+        player.location, player.presence_active = "b", True
+        outcome, out = _step(scenario, player, rooms, events, "look")          # chapter two: override
+        assert outcome == "caught" and "R-LYEH TAKES YOU" in out
+
+        # Pacing: threshold 2 in chapter two vs the default 3 in chapter one.
+        for room_id, looks_needed in (("a", 3), ("b", 2)):
+            scenario, player, rooms, events = _chapter_game(Path(d) / f"p{room_id}")
+            player.location = room_id
+            for n in range(looks_needed):
+                assert player.presence_active is False
+                _step(scenario, player, rooms, events, "look", rng=_AlwaysDread())
+            assert player.presence_active is True, room_id
+
+
+def test_chapter_survives_a_save_and_load():
+    import tempfile
+    from game.save_load import apply_snapshot, snapshot
+    with tempfile.TemporaryDirectory() as d:
+        scenario, player, rooms, events = _chapter_game(Path(d) / "s")
+        player.bonus_clues = 2
+        _step(scenario, player, rooms, events, "go north")
+        rng, _ = make_rng(1)
+        saved = snapshot(scenario, rooms, events, player, rng)
+        player2, rooms2, events2, rng2 = _fresh_game(scenario, seed=2)
+        apply_snapshot(saved, scenario, rooms2, events2, player2, rng2)
+        assert player2.chapter == "two" and player2.location == "b"
+
+
+def test_validator_catches_bad_chapter_gate_and_finale_definitions():
+    def scenario(exits, chapters=None, room_chapter=None, items=3):
+        room = {"name": "A", "description_variants": ["x"], "exits": exits}
+        if room_chapter:
+            room["chapter"] = room_chapter
+        return Scenario(
+            name="t", title="t", description="", start_room="a", rooms={"a": room, "b": {
+                "name": "B", "description_variants": ["y"], "exits": {}}},
+            items={f"c{i}": {"name": f"c{i}", "valid_rooms": ["a"], "is_clue": True} for i in range(items)},
+            events=[], chapters=chapters or {},
+        )
+
+    def errors_for(**kw):
+        return validate_scenario(scenario(**kw))
+
+    good_finale = [{"min_clues": 2, "text": "x", "result": "win"}, {"text": "y", "result": "lose"}]
+    assert errors_for(exits={"d": {"finale": good_finale}}) == []
+    # (this fixture has clues but no win exit, so look only at errors about the gate itself)
+    assert not [e for e in errors_for(exits={"n": {"target": "b", "requires_clues": 2}}) if "exit 'n'" in e]
+
+    def has(msg, **kw):
+        assert any(msg in e for e in errors_for(**kw)), (msg, errors_for(**kw))
+
+    has("non-empty list", exits={"d": {"finale": "nope"}})
+    has("last entry with no min_clues", exits={"d": {"finale": [{"min_clues": 1, "text": "x", "result": "win"}]}})
+    has("unreachable", exits={"d": {"finale": [{"text": "x", "result": "win"}, {"text": "y", "result": "lose"}]}})
+    has("highest min_clues to lowest", exits={"d": {"finale": [
+        {"min_clues": 1, "text": "x", "result": "win"}, {"min_clues": 2, "text": "y", "result": "win"},
+        {"text": "z", "result": "lose"}]}})
+    has("result must be", exits={"d": {"finale": [{"text": "x", "result": "draw"}]}})
+    has("needs a 'text'", exits={"d": {"finale": [{"result": "win"}]}})
+    has("greater than the total", exits={"d": {"finale": [
+        {"min_clues": 9, "text": "x", "result": "win"}, {"text": "y", "result": "lose"}]}})
+    has("positive integer", exits={"n": {"target": "b", "requires_clues": 0}})
+    has("greater than the total", exits={"n": {"target": "b", "requires_clues": 9}})
+    has("no target", exits={"n": {"requires_clues": 2}})
+    has("needs a title", exits={}, chapters={"one": {"intro": "x"}})
+    has("unknown chapter", exits={}, chapters={"one": {"title": "T"}}, room_chapter="two")
+    has("defines no chapters", exits={}, room_chapter="one")
+    has("chance_by_tier", exits={}, chapters={"one": {"title": "T", "threat": {"chance_by_tier": {"lucid": 2}}}})
+
+
+def test_malformed_chapters_block_is_a_clear_scenario_error():
+    import tempfile
+    from game.content_loader import ScenarioError
+    with tempfile.TemporaryDirectory() as d:
+        base = Path(d) / "m"
+        _chapter_game(base)
+        (base / "manifest.yaml").write_text("title: T\nstart_room: a\nchapters: [1, 2]\n", encoding="utf-8")
+        try:
+            load_scenario(base)
+        except ScenarioError as e:
+            assert "'chapters' must be a mapping" in str(e)
+        else:
+            raise AssertionError("expected ScenarioError")
+
+
 def run_all():
     tests = [v for k, v in globals().items() if k.startswith("test_")]
     for t in tests:

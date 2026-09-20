@@ -81,6 +81,16 @@ class Scenario:
     # scenario size - see game/balance.py). 1.0 means "as authored".
     dread_scale: float = 1.0
     sanity_scale: float = 1.0
+    # Optional story structure: {chapter_id: {"title", "intro", "threat"}}.
+    # chapter_threats holds each chapter's threat with its overrides already
+    # merged over the scenario-wide one (see threat_for).
+    chapters: dict = field(default_factory=dict)
+    chapter_threats: dict = field(default_factory=dict)
+
+    def threat_for(self, room: dict) -> dict:
+        """The threat config in force in `room` - its chapter's merged
+        override if it has one, else the scenario-wide threat."""
+        return self.chapter_threats.get(room.get("chapter"), self.threat)
 
 
 def _scale_amount(value, scale: float):
@@ -141,6 +151,22 @@ def load_scenario(data_dir: Path) -> Scenario:
         "hide_text": manifest_threat.get("hide_text"),
     }
 
+    chapters = manifest.get("chapters") or {}
+    if not isinstance(chapters, dict):
+        raise ScenarioError(
+            f"{data_dir / 'manifest.yaml'}: 'chapters' must be a mapping of "
+            f"chapter id to its title/intro/threat"
+        )
+    chapter_threats = {}
+    for chapter_id, chapter in chapters.items():
+        override = (chapter or {}).get("threat") or {}
+        chapter_threats[chapter_id] = {
+            "threshold": override.get("threshold", threat["threshold"]),
+            "chance_by_tier": {**threat["chance_by_tier"], **(override.get("chance_by_tier") or {})},
+            **{k: override.get(k) or threat[k]
+               for k in ("manifest_text", "caught_text", "evade_text", "hide_text")},
+        }
+
     dread_scale = manifest.get("dread_scale")
     if dread_scale is None:
         dread_scale = compute_dread_scale(len(rooms))
@@ -166,6 +192,8 @@ def load_scenario(data_dir: Path) -> Scenario:
         broken_text=manifest.get("broken_text"),
         dread_scale=dread_scale,
         sanity_scale=sanity_scale,
+        chapters=chapters,
+        chapter_threats=chapter_threats,
     )
 
     errors = validate_scenario(scenario)
@@ -220,6 +248,56 @@ def _load_yaml(path: Path):
             raise ScenarioError(f"{path}: invalid YAML - {e}") from e
 
 
+def _validate_threat(threat: dict, label: str) -> List[str]:
+    """Problems in a threat block (the scenario-wide one, or a chapter's
+    partial override of it)."""
+    errors: List[str] = []
+    if threat.get("threshold", DREAD_THRESHOLD) < 1:
+        errors.append(f"{label}.threshold must be at least 1, got {threat.get('threshold')}")
+    for key, value in (threat.get("chance_by_tier") or {}).items():
+        if key not in VALID_TIER_KEYS:
+            errors.append(
+                f"{label}.chance_by_tier has unknown tier key '{key}' "
+                f"(expected one of {sorted(VALID_TIER_KEYS)})"
+            )
+        elif not (0 <= value <= 1):
+            errors.append(f"{label}.chance_by_tier['{key}'] must be between 0 and 1, got {value}")
+    return errors
+
+
+def _validate_finale(room_id: str, direction: str, finale, scenario: Scenario) -> List[str]:
+    """Problems in an exit's `finale` list: tiered endings picked by clue
+    count, evaluated top to bottom, the last entry being the fallback."""
+    where = f"room '{room_id}' exit '{direction}' finale"
+    if not isinstance(finale, list) or not finale:
+        return [f"{where} must be a non-empty list of endings"]
+    errors: List[str] = []
+    total = sum(1 for i in scenario.items.values() if i.get("is_clue"))
+    previous = None
+    for n, entry in enumerate(finale, start=1):
+        if not isinstance(entry, dict) or not entry.get("text"):
+            errors.append(f"{where} entry {n} needs a 'text'")
+            continue
+        if entry.get("result") not in ("win", "lose"):
+            errors.append(f"{where} entry {n} result must be 'win' or 'lose', got {entry.get('result')!r}")
+        minimum = entry.get("min_clues")
+        if minimum is None:
+            if n != len(finale):
+                errors.append(f"{where} entry {n} has no min_clues, so every entry after it is unreachable")
+            continue
+        if isinstance(minimum, bool) or not isinstance(minimum, int) or minimum <= 0:
+            errors.append(f"{where} entry {n} min_clues must be a positive integer, got {minimum!r}")
+            continue
+        if minimum > total:
+            errors.append(f"{where} entry {n} min_clues ({minimum}) is greater than the total is_clue items ({total})")
+        if previous is not None and minimum >= previous:
+            errors.append(f"{where} entries must go from highest min_clues to lowest (entry {n} is {minimum} after {previous})")
+        previous = minimum
+    if isinstance(finale[-1], dict) and finale[-1].get("min_clues") is not None:
+        errors.append(f"{where} needs a last entry with no min_clues, as the fallback ending")
+    return errors
+
+
 def validate_scenario(scenario: Scenario) -> List[str]:
     """Return a list of human-readable problems with the scenario's
     content. An empty list means the scenario is valid."""
@@ -236,12 +314,32 @@ def validate_scenario(scenario: Scenario) -> List[str]:
         for direction, exit_info in room.get("exits", {}).items():
             target = exit_info.get("target")
             requires_all_clues = exit_info.get("requires_all_clues")
+            finale = exit_info.get("finale")
 
-            if target is None and not requires_all_clues:
+            if target is None and not requires_all_clues and not finale:
                 errors.append(
                     f"room '{room_id}' exit '{direction}' has no target "
-                    f"(and isn't a requires_all_clues exit)"
+                    f"(and isn't a requires_all_clues or finale exit)"
                 )
+            if finale:
+                errors.extend(_validate_finale(room_id, direction, finale, scenario))
+            if "requires_clues" in exit_info:
+                needed = exit_info["requires_clues"]
+                total = sum(1 for i in scenario.items.values() if i.get("is_clue"))
+                if isinstance(needed, bool) or not isinstance(needed, int) or needed <= 0:
+                    errors.append(
+                        f"room '{room_id}' exit '{direction}' requires_clues must be a "
+                        f"positive integer, got {needed!r}"
+                    )
+                elif needed > total:
+                    errors.append(
+                        f"room '{room_id}' exit '{direction}' requires_clues ({needed}) is "
+                        f"greater than the total number of is_clue items ({total})"
+                    )
+                if target is None:
+                    errors.append(
+                        f"room '{room_id}' exit '{direction}' has requires_clues but no target"
+                    )
             if target is not None and target not in room_ids:
                 errors.append(
                     f"room '{room_id}' exit '{direction}' targets "
@@ -292,14 +390,14 @@ def validate_scenario(scenario: Scenario) -> List[str]:
 
     has_clue = any(item.get("is_clue") for item in scenario.items.values())
     has_win_exit = any(
-        exit_info.get("requires_all_clues")
+        exit_info.get("requires_all_clues") or exit_info.get("finale")
         for room in scenario.rooms.values()
         for exit_info in room.get("exits", {}).values()
     )
     if has_clue and not has_win_exit:
-        errors.append("items are marked is_clue, but no exit has requires_all_clues")
+        errors.append("items are marked is_clue, but no exit has requires_all_clues or a finale")
     if has_win_exit and not has_clue:
-        errors.append("an exit has requires_all_clues, but no item is marked is_clue")
+        errors.append("an exit has requires_all_clues or a finale, but no item is marked is_clue")
 
     total_clues = sum(1 for item in scenario.items.values() if item.get("is_clue"))
     if scenario.clues_required is not None:
@@ -328,17 +426,22 @@ def validate_scenario(scenario: Scenario) -> List[str]:
         if risk_multiplier is not None and risk_multiplier <= 0:
             errors.append(f"room '{room_id}' has a non-positive risk_multiplier")
 
-    threat = scenario.threat or {}
-    if threat.get("threshold", DREAD_THRESHOLD) < 1:
-        errors.append(f"threat.threshold must be at least 1, got {threat.get('threshold')}")
-    for key, value in (threat.get("chance_by_tier") or {}).items():
-        if key not in VALID_TIER_KEYS:
-            errors.append(
-                f"threat.chance_by_tier has unknown tier key '{key}' "
-                f"(expected one of {sorted(VALID_TIER_KEYS)})"
-            )
-        elif not (0 <= value <= 1):
-            errors.append(f"threat.chance_by_tier['{key}'] must be between 0 and 1, got {value}")
+    errors.extend(_validate_threat(scenario.threat or {}, "threat"))
+
+    for chapter_id, chapter in scenario.chapters.items():
+        if not isinstance(chapter, dict) or not chapter.get("title"):
+            errors.append(f"chapter '{chapter_id}' needs a title")
+            continue
+        errors.extend(_validate_threat(chapter.get("threat") or {}, f"chapter '{chapter_id}' threat"))
+    if scenario.chapters:
+        for room_id, room in scenario.rooms.items():
+            chapter_id = room.get("chapter")
+            if chapter_id is not None and chapter_id not in scenario.chapters:
+                errors.append(f"room '{room_id}' is in unknown chapter '{chapter_id}'")
+    else:
+        for room_id, room in scenario.rooms.items():
+            if room.get("chapter") is not None:
+                errors.append(f"room '{room_id}' has a chapter but the manifest defines no chapters")
 
     if scenario.sanity_tier_thresholds is not None:
         tiers = scenario.sanity_tier_thresholds
