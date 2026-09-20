@@ -1,0 +1,1301 @@
+# Rooms for the "sleeper" scenario. 45 rooms in four chapters.
+#
+# Chapter I - Providence:
+#   angell_hall (start, safe), angell_study, angell_cabinet (locked),
+#   angell_attic, college_street (hub), athenaeum, athenaeum_stacks (locked),
+#   lecture_hall, thomas_street, fleur_de_lys, wilcox_studio,
+#   providence_station (gate to Chapter II)
+# Chapter II - New Orleans and the bayou:
+#   nola_station (safe), french_quarter (hub), police_hq, legrasse_office,
+#   evidence_room (locked), dockside_tavern, occult_bookshop,
+#   boarding_house (safe), nola_harbor (gate to Chapter III), bayou_road,
+#   fishing_shack, cypress_swamp, cultist_clearing, monolith
+# Chapter III - Oslo and Dunedin:
+#   oslo_quay (safe), oslo_street, johansen_house, johansen_study (locked),
+#   maritime_archive, dunedin_docks (gate to Chapter IV), sailors_mission
+#   (safe), alert_hulk
+# Chapter IV - R'lyeh:
+#   ship_deck (safe), black_shoal, cyclopean_quay, slime_causeway,
+#   crooked_plaza (hub; gate to the temple), obelisk_avenue, tilted_arcade,
+#   bone_gallery, temple_gate, vault_antechamber, the_vault (finale)
+
+# ============================== CHAPTER I ==============================
+
+angell_hall:
+  name: "Angell's Front Hall"
+  chapter: providence
+  description_variants:
+    - >-
+      A narrow hall smelling of pipe smoke and old paper. Your great-uncle's
+      coat is still on its hook. The staircase climbs into shadow, and a
+      door to the north stands ajar on his study.
+    - >-
+      The house has the held-breath quiet of a place that knows its owner
+      isn't coming back. Dust hasn't started to settle yet. That, somehow,
+      is worse.
+  exits:
+    north:
+      target: angell_study
+    up:
+      target: angell_attic
+    south:
+      target: college_street
+  safe: true
+  rest_amount: 15
+  rest_text: >-
+    You sit on the bottom stair in the coat-smelling dark and let the
+    house be quiet around you until your hands are yours again.
+  scenery:
+    coat: >-
+      Tweed, elbows worn through, pockets still holding a folded railway
+      timetable and a pencil chewed down to nothing.
+    stairs: >-
+      Somebody has been going up and down these more than a man of his age
+      should. The third step has a groove worn in it where he stopped and
+      listened to something.
+
+angell_study:
+  name: "The Professor's Study"
+  chapter: providence
+  description_variants:
+    - >-
+      Books to the ceiling, and on the desk a spread of newspaper cuttings
+      from cities that have nothing to do with one another. A cabinet with
+      a heavy lock stands against the far wall, and pinned to it, the note.
+    - >-
+      A green-shaded lamp still lit over a blotter covered in his cramped,
+      careful handwriting. The margin of every page has the same small
+      drawing: a shape with too many limbs, and a question mark.
+  exits:
+    south:
+      target: angell_hall
+    in:
+      target: angell_cabinet
+      locked: true
+      unlock_item: angell_key
+      locked_text: >-
+        The cabinet is locked, and it's a serious lock - brass, old, made
+        to keep something in rather than out. Somewhere in this house
+        there must be a key.
+      unlock_text: >-
+        The key turns with a reluctance you can feel in your wrist. The
+        cabinet door swings inward on a narrow room lined with shelves.
+  scenery:
+    cuttings: >-
+      Reports of sudden hysteria and art-colony breakdowns, of a strange
+      little cult in Greenland, of mass madness in a Pacific port. He has
+      circled the dates. They cluster in a single week of March.
+    lamp: >-
+      Still warm. Whoever last turned it on did it minutes ago, or years.
+
+angell_cabinet:
+  name: "The Cabinet Room"
+  chapter: providence
+  description_variants:
+    - >-
+      A closet more than a room, shelved floor to ceiling with boxes and
+      folders in a system only he understood. One shelf has been cleared
+      to make room for a single flat box, and it is wrapped in a knotted
+      string.
+    - >-
+      It smells of camphor and something colder, like the inside of a
+      seashell held up to the ear. The one box that has been handled
+      recently sits at eye level.
+  exits:
+    out:
+      target: angell_study
+  scenery:
+    box: >-
+      Wrapped and knotted with a professor's precision. It has been opened
+      and retied so many times the string has worn shiny.
+
+angell_attic:
+  name: "The Attic"
+  chapter: providence
+  description_variants:
+    - >-
+      Steamer trunks and sheeted furniture under a low roof. Someone has
+      cleared a path through the middle of it to a single window, and
+      placed a chair there, facing south, as if to watch for a train.
+    - >-
+      A trunk lies open on the floorboards, its contents half-sorted:
+      postcards, a pair of field glasses, a child's drawing of a ship.
+      The chair by the window has been pulled up close.
+  exits:
+    down:
+      target: angell_hall
+  scenery:
+    window: >-
+      It looks out over the whole city, and toward the harbor. He must
+      have sat here in the evenings, watching the water.
+    trunks: >-
+      Steamer trunks stickered from ports you'd never associate with a
+      Semitic-languages professor. He had, apparently, been looking for
+      something for a very long time.
+
+college_street:
+  name: "College Street"
+  chapter: providence
+  description_variants:
+    - >-
+      A steep old street of clapboard and brick, the kind of Providence
+      hill that makes older men stop to catch their breath. The lamps are
+      lit against the early dark. Somewhere down the hill, water.
+    - >-
+      A wet cobbled slope under a low sky. Students hurry past in twos and
+      threes without looking at you, as if you carried the professor's
+      death on you like a smell.
+  exits:
+    north:
+      target: angell_hall
+    east:
+      target: athenaeum
+    west:
+      target: lecture_hall
+    south:
+      target: thomas_street
+  scenery:
+    lamps: >-
+      Gas, still, on this stretch. The flames lean very slightly toward the
+      harbor, all together, as though something down there were breathing in.
+
+athenaeum:
+  name: "The Athenaeum"
+  chapter: providence
+  description_variants:
+    - >-
+      A hushed reading room of green lamps and long oak tables. Behind the
+      circulation desk a heavy grille closes off the stacks. A brass plate
+      reads: RESTRICTED - BY LETTER OF INTRODUCTION.
+    - >-
+      Every reader in the room is very carefully not looking at you. The
+      grille to the stacks is padlocked, and someone has recently wiped a
+      fingerprint from the brass.
+  exits:
+    west:
+      target: college_street
+    in:
+      target: athenaeum_stacks
+      locked: true
+      unlock_item: stacks_pass
+      locked_text: >-
+        The grille is locked. A reader's pass would open it; nothing else
+        will.
+      unlock_text: >-
+        The librarian's pass is honored with a nod so brief you'd think
+        you'd imagined it. The grille rolls aside.
+  scenery:
+    grille: >-
+      Wrought iron in a pattern of interlocking waves. It has been polished
+      by a very great number of hands, all of them wanting to go in.
+
+athenaeum_stacks:
+  name: "The Restricted Stacks"
+  chapter: providence
+  description_variants:
+    - >-
+      Narrow aisles of books that have been kept from other books. The air
+      is chilly and slightly damp, though the walls are dry. Most of the
+      spines have no titles.
+    - >-
+      A single electric bulb, too dim, over shelves of things that were
+      not meant to be catalogued. Something on the top shelf has been
+      moved since the dust last settled.
+  exits:
+    out:
+      target: athenaeum
+  scenery:
+    shelves: >-
+      Bound manuscripts, bootleg translations, monographs printed at the
+      author's own expense and then quietly withdrawn from every other
+      library on earth.
+
+lecture_hall:
+  name: "The Anthropology Hall"
+  chapter: providence
+  description_variants:
+    - >-
+      An empty lecture theatre, chalk still on the boards. On the front
+      table a stack of society proceedings has been left with a slip of
+      paper marking one particular meeting.
+    - >-
+      The tiered seats curve down to a lectern draped with a green cloth.
+      On the blackboard, someone has drawn the same tentacled shape as the
+      one in the professor's margins, and then tried to rub it out.
+  exits:
+    east:
+      target: college_street
+  scenery:
+    blackboard: >-
+      The rubbed-out shape is still faintly visible in the chalk dust. It
+      was drawn from memory, by someone who'd seen the original only once.
+    lectern: >-
+      The cloth hides a shelf of notes. Most are a dead man's lecture
+      outlines. One folded page, in a hand you don't know, says only
+      DON'T SLEEP.
+
+thomas_street:
+  name: "Thomas Street"
+  chapter: providence
+  description_variants:
+    - >-
+      A downhill street of tall old brick buildings, half of them turned
+      into studios and flats. The one with the fleur-de-lys carved over
+      the door leans a very little toward the river. The railway station
+      is a short walk east.
+    - >-
+      The lamps down here are further apart. The tall buildings lean close
+      overhead, and the sound of your footsteps comes back to you a half
+      second late.
+  exits:
+    north:
+      target: college_street
+    in:
+      target: fleur_de_lys
+    east:
+      target: providence_station
+  risk_multiplier: 1.3
+
+fleur_de_lys:
+  name: "The Fleur-de-Lys Building"
+  chapter: providence
+  description_variants:
+    - >-
+      A dim entrance hall of cracked tile and a stairwell that smells of
+      turpentine. The mailboxes list a dozen artists' names, and one long
+      strip of card with the name torn away. The stairs climb toward the
+      sculptor's rooms.
+    - >-
+      A landlady's notice about noise is pinned to the wall. Someone has
+      written under it, in pencil: NOT THE ARTISTS. THE DREAMS.
+  exits:
+    out:
+      target: thomas_street
+    up:
+      target: wilcox_studio
+  scenery:
+    notice: >-
+      Complaints about shouting at night, and something that sounded like
+      chanting. The last line, in a different ink: TENANT REMOVED. NO
+      FORWARDING ADDRESS.
+
+wilcox_studio:
+  name: "The Sculptor's Studio"
+  chapter: providence
+  description_variants:
+    - >-
+      The room of a young man who has stopped sleeping. Clay dust on every
+      surface, and on an easel a wet cast that has not been finished, or
+      has been finished and kept looking wrong. The rooftops outside the
+      window all lean the same way.
+    - >-
+      Sketches are pinned to every wall, hundreds of them, all of the same
+      impossible architecture: slabs of stone that don't meet at any angle
+      you can hold in your mind for more than a second.
+  exits:
+    down:
+      target: fleur_de_lys
+  risk_multiplier: 1.4
+  scenery:
+    sketches: >-
+      They are dated - one a night, for two months. In the margin of each,
+      a time. Every time is within the same quarter hour, a little past
+      three in the morning.
+    cast: >-
+      The clay is still damp. It has a texture you can't place, like the
+      skin of something that lives where the light doesn't reach.
+
+providence_station:
+  name: "Providence Station"
+  chapter: providence
+  description_variants:
+    - >-
+      A high-vaulted hall of smoke and steam, with the southbound platform
+      at the far end. The timetable lists a train for New Orleans that
+      leaves whenever you are ready to be on it. Once you board, this city
+      and anything unfinished in it stays behind.
+    - >-
+      Porters, luggage, a boy selling papers. In the departures window the
+      ticket clerk is looking at you as if he already knows where you are
+      going, and doesn't think much of your chances.
+  exits:
+    west:
+      target: thomas_street
+    south:
+      target: nola_station
+      requires_clues: 4
+      travel_text: >-
+        The train pulls out of Providence in the dark. Rain begins outside
+        the window somewhere in Virginia, and doesn't stop. You watch the
+        black country go by and try, for hours, to remember whether your
+        great-uncle's note said BURN THESE or FINISH THEM. By the time the
+        lights of New Orleans appear you are quite sure it said both.
+      locked_text: >-
+        You're not ready to leave Providence. There has to be more in
+        these papers, and in this city, before you follow the trail south -
+        arriving in New Orleans knowing too little would be worse than
+        never going.
+  scenery:
+    timetable: >-
+      NEW ORLEANS - SOUTHBOUND. The line beneath it has been pencilled in
+      by hand: NO RETURN CONNECTION.
+
+# ============================== CHAPTER II =============================
+
+nola_station:
+  name: "Union Passenger Terminal"
+  chapter: new_orleans
+  description_variants:
+    - >-
+      Heat, and the smell of river mud, coffee and coal smoke. The platform
+      empties around you as the train ticks and cools. There's no train
+      north on the board. You look for one anyway.
+    - >-
+      A porter takes your bag without being asked and sets it down again
+      without being paid, having looked at your face. The city beyond the
+      arches is loud with the kind of noise that has been going on for
+      three hundred years.
+  exits:
+    north:
+      target: french_quarter
+  safe: true
+  rest_amount: 12
+  rest_text: >-
+    You sit on a bench under the big clock, feet planted, and breathe
+    the wet air until it is only air.
+  scenery:
+    clock: >-
+      It's running perhaps four minutes fast, and the second hand doesn't
+      sweep so much as pulse, as if keeping time for something else.
+
+french_quarter:
+  name: "The French Quarter"
+  chapter: new_orleans
+  description_variants:
+    - >-
+      Iron balconies dripping with fern and rain. A brass band somewhere
+      is playing something slow and ruined. The street runs off at odd
+      angles toward the police station, a tavern, a shop with no sign, and
+      a boarding-house with a lamp in every window.
+    - >-
+      Wet cobbles, and the smell of a hundred kitchens. In every doorway
+      someone is being careful not to look at you, and in every window
+      someone is looking after you when you pass.
+  exits:
+    south:
+      target: nola_station
+    north:
+      target: police_hq
+    east:
+      target: dockside_tavern
+    west:
+      target: occult_bookshop
+    in:
+      target: boarding_house
+  scenery:
+    balconies: >-
+      Someone has hung a string of small bone charms from the ironwork
+      of every house on the block. They knock together in the breeze with
+      a rhythm you find you're walking to.
+
+police_hq:
+  name: "Police Headquarters"
+  chapter: new_orleans
+  description_variants:
+    - >-
+      A scarred wooden desk, a wall of wanted notices, and a duty sergeant
+      who has plainly been told about you. A corridor leads north to the
+      inspector's office. A steel door at the foot of the back stairs is
+      marked EVIDENCE.
+    - >-
+      Ceiling fans turn slowly over a room full of men not quite talking.
+      A framed photograph of a raid on the swamp hangs behind the desk,
+      the subjects of the arrest blurred as though they wouldn't hold
+      still to be photographed.
+  exits:
+    south:
+      target: french_quarter
+    north:
+      target: legrasse_office
+    down:
+      target: evidence_room
+      locked: true
+      unlock_item: evidence_key
+      locked_text: >-
+        The evidence room is locked. The sergeant's eyes flick, very
+        briefly, to a hook on the wall behind his desk, and away again.
+      unlock_text: >-
+        The key turns. The sergeant stares at his blotter, carefully, as
+        you go down.
+  scenery:
+    photograph: >-
+      Twenty-odd men and women in ragged clothes, marched out of the
+      bayou in chains. Every face in the photograph is turned toward a
+      point outside the frame - the same point, all of them, as if
+      something out there were speaking.
+
+legrasse_office:
+  name: "The Inspector's Office"
+  chapter: new_orleans
+  description_variants:
+    - >-
+      A cramped office, cluttered and businesslike. A map of the parishes
+      on the wall has been marked with red pins that trace a line down to
+      a single spot in the swamp. The inspector himself is not here. His
+      papers are.
+    - >-
+      Legrasse has cleared a corner of the desk for a single sheet of
+      foolscap and a dish of cold coffee. He was clearly interrupted
+      mid-sentence. He has been interrupted, you suspect, quite often.
+  exits:
+    south:
+      target: police_hq
+  scenery:
+    map: >-
+      The pins trace a line from the city into the swamp, and stop. Written
+      in the margin, in a shaky hand: THEY WERE NOT THERE WHEN WE CAME BACK.
+    coffee: >-
+      Cold, but not stale. He left minutes ago.
+
+evidence_room:
+  name: "The Evidence Room"
+  chapter: new_orleans
+  description_variants:
+    - >-
+      Cages of the ordinary and the terrible: knives, ledgers, a child's
+      shoe. On a table under a green cloth sits the reason the room is
+      kept locked, and everyone in the building knows it.
+    - >-
+      The bare bulb doesn't reach the corners. From somewhere among the
+      shelves comes the very faint sound of something being very carefully
+      not-sighed.
+  exits:
+    up:
+      target: police_hq
+  risk_multiplier: 1.4
+  scenery:
+    cloth: >-
+      A square of green baize, folded tight over something that, from the
+      way the cloth sits, has too many limbs to fold neatly.
+
+dockside_tavern:
+  name: "The Dockside Tavern"
+  chapter: new_orleans
+  description_variants:
+    - >-
+      A low-ceilinged bar smelling of rum and river. The regulars sit in
+      pairs, talking with their mouths and not their eyes. In the back a
+      man is drinking alone with the concentration of someone who has
+      tried, and failed, to get to the bottom of the bottle.
+    - >-
+      A hurricane lamp sways on its chain. The barman keeps his hands on
+      the counter where you can see them. Someone has carved a small
+      spiral into the edge of every table, at the exact place where a
+      drinker's hand would rest.
+  exits:
+    west:
+      target: french_quarter
+    east:
+      target: nola_harbor
+    south:
+      target: bayou_road
+  scenery:
+    tables: >-
+      A spiral, carved and re-carved, as if by different hands over many
+      years. Not one of the drinkers seems to have noticed.
+
+occult_bookshop:
+  name: "The Shop With No Sign"
+  chapter: new_orleans
+  description_variants:
+    - >-
+      A shop the width of a hallway, shelved to the rafters with cracked
+      leather and things bound in stranger stuff. The proprietor is a thin
+      man who watches you enter like someone reading a difficult page.
+    - >-
+      A cat with too-pale eyes watches from a shelf of Latin. The air is
+      cool, and smells of cedar, iodine and a certain old, deep dampness
+      you can't place until you remember the seashore.
+  exits:
+    east:
+      target: french_quarter
+  scenery:
+    cat: >-
+      It hasn't blinked, that you've seen. It seems to be listening, not
+      to you, but to something you're standing on.
+
+boarding_house:
+  name: "Madame Delacroix's Boarding House"
+  chapter: new_orleans
+  description_variants:
+    - >-
+      A tall, clean, unfashionable house full of ferns and the slow tick
+      of a hall clock. The landlady, having assessed you, gives you a key
+      and asks no questions, which is the greatest kindness of your trip
+      so far.
+    - >-
+      A rocking chair moves on the landing though there's no draught. The
+      whole house smells of beeswax and chicory, and in the parlour a lamp
+      is lit for someone who hasn't come home.
+  exits:
+    out:
+      target: french_quarter
+  safe: true
+  rest_amount: 18
+  rest_text: >-
+    You lock the door of a small clean room and lie fully clothed on
+    the coverlet. Somewhere below, a hall clock ticks steadily, and the
+    old wood says nothing to you at all.
+  scenery:
+    lamp: >-
+      Lit every evening, the landlady says, for a lodger who left owing
+      a week's rent and hasn't been back. "He was quite mad," she adds.
+      "But such a polite man."
+
+nola_harbor:
+  name: "The Levee"
+  chapter: new_orleans
+  description_variants:
+    - >-
+      The great river slides past, brown and slow, thick with the noise of
+      cranes and steam whistles. A steamer for northern Europe is taking
+      on cargo. Once you board, the South and everything you left
+      unfinished in it stays behind.
+    - >-
+      Stevedores swear in four languages at a stack of crates. A shipping
+      agent at a folding table checks your face against a list, finds
+      nothing, and is visibly disappointed.
+  exits:
+    west:
+      target: dockside_tavern
+    east:
+      target: oslo_quay
+      requires_clues: 9
+      travel_text: >-
+        The steamer leaves the delta at dusk, and the river gives way to
+        the Gulf, and the Gulf to a grey, heaving open sea that goes on
+        without editorial comment. Twelve days pass in a cabin the size
+        of a coffin. On the thirteenth you smell pine and cold stone, and
+        the coast of Norway comes up out of the mist like a memory of
+        something you'd been trying to forget.
+      locked_text: >-
+        You're not ready. A passage to Norway on the strength of this much
+        would be a passage to nowhere - you'd arrive with no idea what to
+        ask, or who to ask it of.
+  scenery:
+    steamer: >-
+      The name has been freshly painted over. Underneath, in the old
+      lettering, you can still make out a different port of registry: not
+      Oslo, but somewhere that doesn't appear on any chart.
+
+bayou_road:
+  name: "The Bayou Road"
+  chapter: new_orleans
+  description_variants:
+    - >-
+      Shell paving gives way to packed earth and then to nothing much. The
+      cypress crowd in on both sides, trailing grey moss. The road forks:
+      a shack on stilts to the east, and to the south, a darker green.
+    - >-
+      The sounds of the city drop away in a single hundred yards. Frogs,
+      insects, and the sense of a great many things holding their breath.
+  exits:
+    north:
+      target: dockside_tavern
+    east:
+      target: fishing_shack
+    south:
+      target: cypress_swamp
+  risk_multiplier: 1.2
+
+fishing_shack:
+  name: "The Squatters' Shack"
+  chapter: new_orleans
+  description_variants:
+    - >-
+      A shack on stilts over black water, abandoned in a hurry - a pot
+      still on the stove, a boy's boot in the doorway. Whoever lived here
+      left their whole life and ran.
+    - >-
+      The floor is warped and slick with old damp. Hung from the rafters
+      on lengths of twine are dozens of small, crude effigies, all of the
+      same impossible outline.
+  exits:
+    west:
+      target: bayou_road
+  scenery:
+    effigies: >-
+      Bundled reeds, feathers, bone, and mud. Whoever made them had never
+      seen the thing they were copying. They had only heard it described,
+      and by someone who didn't dare finish the sentence.
+
+cypress_swamp:
+  name: "The Cypress Swamp"
+  chapter: new_orleans
+  description_variants:
+    - >-
+      Black water, knee-deep in places and bottomless in others, under a
+      roof of moss and branch that keeps out the last of the day. The
+      drumming is much clearer here. You can feel it in the soles of
+      your feet.
+    - >-
+      Fireflies in the dark, which is lovely, until you notice they are
+      moving in a slow, deliberate circle around a point just ahead of
+      you.
+  exits:
+    north:
+      target: bayou_road
+    south:
+      target: cultist_clearing
+  risk_multiplier: 1.6
+
+cultist_clearing:
+  name: "The Clearing"
+  chapter: new_orleans
+  description_variants:
+    - >-
+      A raised patch of dry earth ringed with the stumps of a hundred
+      hacked cypress. The ground is trampled bare and stained in a great
+      circle. The bonfire pit has been kicked apart, but the shape of a
+      gathering is unmistakable.
+    - >-
+      Someone has stripped the moss from every tree at the edge of the
+      clearing and hung, in its place, the same bundled effigies as in the
+      shack. Up close you see that what they are tied with isn't twine.
+  exits:
+    north:
+      target: cypress_swamp
+    east:
+      target: monolith
+  risk_multiplier: 1.5
+  scenery:
+    ground: >-
+      The great circle of stain is almost a diagram. Its parts meet at
+      angles that don't quite close, and it takes you a moment to realize
+      that's the point.
+
+monolith:
+  name: "The Monolith"
+  chapter: new_orleans
+  description_variants:
+    - >-
+      A rough stone pillar, twice a man's height, wrong in every way that
+      matters and right in the one it wants you to see. Around its foot a
+      ring of flat stones has been worn smooth by kneeling.
+    - >-
+      Under the black canopy the monolith has a faint, cold luminescence,
+      the kind of light you find on dead things. The chant, carved down
+      one face in a script you should not be able to read, seems to
+      shift when you look away.
+  exits:
+    west:
+      target: cultist_clearing
+  risk_multiplier: 1.8
+  scenery:
+    stone: >-
+      It is not local rock. It is not, you think, from anywhere that had
+      a sun. It is warm - and the warmth increases when you say nothing.
+    chant: >-
+      Letters cut in a hand that never intended to be read aloud. You can
+      feel your mouth beginning to shape them. You press it shut.
+
+# ============================== CHAPTER III ============================
+
+oslo_quay:
+  name: "The Oslo Quay"
+  chapter: johansen
+  description_variants:
+    - >-
+      Grey water, grey sky, grey stone, and the clean cold air of a place
+      that keeps its dead where it can see them. Gulls wheel over
+      fishing smacks. A ferry for the far side of the world is loading at
+      the next pier.
+    - >-
+      Fog rolls up the fjord and takes the far shore in a single breath.
+      The customs officer waves you through with a glance, the way one
+      waves through the family of the recently bereaved.
+  exits:
+    north:
+      target: oslo_street
+    east:
+      target: dunedin_docks
+      travel_text: >-
+        The long southern passage takes a month and remembers every day
+        of it. The sea grows warmer, then colder, then very strange; the
+        stars turn over and become the wrong stars. On the last night the
+        ship's bell rings by itself, three times, and no one aboard will
+        admit to having heard it. Dunedin comes up out of a low grey
+        morning like a small, tidy town nobody had warned about.
+  safe: true
+  rest_amount: 12
+  rest_text: >-
+    You sit on a coil of cable and watch the fjord until it stops being
+    dark and starts being only water.
+  scenery:
+    ferry: >-
+      Southbound, and half empty. The few passengers keep to the rail,
+      watching the horizon with the fixed look of people who have already
+      decided what they don't want to see.
+
+oslo_street:
+  name: "Ostergade"
+  chapter: johansen
+  description_variants:
+    - >-
+      A steep cobbled street of tall narrow houses, shutters latched
+      against the cold. A widow's house halfway up has one lit window;
+      a maritime archive occupies a granite building at the far end.
+    - >-
+      Snow-dusted, quiet, the lamp posts spaced like a row of held
+      breaths. Somewhere a church clock strikes an hour that doesn't
+      match any other clock in the city.
+  exits:
+    south:
+      target: oslo_quay
+    east:
+      target: johansen_house
+    west:
+      target: maritime_archive
+  scenery:
+    lamp posts: >-
+      Someone has scratched a small cross at the foot of each, and, beside
+      it, a tally mark. Nineteen. You don't count the lamps.
+
+johansen_house:
+  name: "The Johansen House"
+  chapter: johansen
+  description_variants:
+    - >-
+      A narrow, tidy house full of ship's models, framed charts and a
+      silence that has grown thick enough to hang a coat on. The widow
+      has left a lamp for you and gone to her sister's. She left a note:
+      SHE COULD NOT SLEEP IN THE HOUSE WITH IT.
+    - >-
+      Salt-stains, faint but everywhere: on the sills, the banister, the
+      rungs of the chairs. The house smells like the underside of a wharf.
+      On the mantelpiece, a photograph of a man whose eyes have been
+      scratched out by someone who loved him.
+  exits:
+    west:
+      target: oslo_street
+    up:
+      target: johansen_study
+      locked: true
+      unlock_item: study_key
+      locked_text: >-
+        The study door is locked, and, judging by the scratches around
+        the keyhole, has been for a long time. The key would have been
+        left somewhere the widow could reach and not have to look at.
+      unlock_text: >-
+        The lock turns without a sound. The air that comes out is cold,
+        and it smells of the sea.
+  scenery:
+    photograph: >-
+      A bearded sailor, squinting into a sun that never seems to have
+      quite reached him. The scratches over the eyes are neat, shallow,
+      and done with a pin.
+    models: >-
+      A dozen careful ship models, all of them wrecks. Every one is
+      broken in exactly the same place, as though struck by the same wave.
+
+johansen_study:
+  name: "Johansen's Study"
+  chapter: johansen
+  description_variants:
+    - >-
+      A small room under the eaves, papered with charts of the Pacific in
+      a hand that grows steadily worse toward the last. The desk holds a
+      sheaf of pages weighted with a lump of green stone that no living
+      man could have carved.
+    - >-
+      The pen is still uncapped. The ink on the last page has run, as if
+      the writer had been weeping, or as if something had been breathing
+      on the paper.
+  exits:
+    down:
+      target: johansen_house
+  risk_multiplier: 1.3
+  scenery:
+    stone: >-
+      A lump of green rock the size of a fist, greasy to the touch. It is
+      warmer than the room. It has, you notice, no shadow.
+    charts: >-
+      Position after position marked in a steady hand, then a last one
+      circled so heavily the pen tore the paper: 47 degrees 9 minutes
+      south, 126 degrees 43 minutes west.
+
+maritime_archive:
+  name: "The Maritime Archive"
+  chapter: johansen
+  description_variants:
+    - >-
+      A granite hall of ledgers, chart cases and glass-fronted models. The
+      archivist, a very old man with a very young voice, speaks of the
+      Alert and the Emma as though they were both still at sea.
+    - >-
+      Rows of registers stretch off into the dim. One has been left open
+      on a reading stand and weighted with a brass sextant: a page of
+      voyages, the last of them struck through in red.
+  exits:
+    east:
+      target: oslo_street
+  scenery:
+    registers: >-
+      The final line reads: EMMA - LOST WITH ALL HANDS, MARCH. Beneath it,
+      in a different hand, a correction: ALL EXCEPT ONE. And beneath that,
+      a further correction: NOT LOST.
+
+dunedin_docks:
+  name: "The Dunedin Docks"
+  chapter: johansen
+  description_variants:
+    - >-
+      Cold southern wind and gulls, and a long green harbour hemmed in by
+      hills. The wharf smells of tar and wet rope. At the far end, tied up
+      alone, a battered vessel that nobody has yet dared to break for
+      scrap.
+    - >-
+      A working harbour, unlovely and honest. The men here don't stop
+      talking when you approach; they stop, instead, at a particular word,
+      and it is not a word you've said.
+  exits:
+    west:
+      target: oslo_quay
+      travel_text: >-
+        The long passage home takes a month and is uneventful in every way
+        except that no one aboard will talk about the water.
+    north:
+      target: sailors_mission
+    east:
+      target: alert_hulk
+    out:
+      target: ship_deck
+      requires_clues: 13
+      travel_text: >-
+        You buy passage on the only vessel that will go where you point,
+        a battered sloop with a crew of two who ask no questions and
+        demand double in advance. The captain looks at your chart, and
+        crosses himself, and takes the helm himself. For days the sea is
+        empty. Then the compass begins to spin, the birds stop, and on the
+        horizon there is a shape too regular to be an island, too tall to
+        be a wave, and too green to be anything at all.
+      locked_text: >-
+        No one will take you past the edge of the charts on the strength
+        of this much. The captains here have heard of that latitude, and
+        the ones who have heard of it want proof you know what you're
+        asking.
+  scenery:
+    harbour: >-
+      Flat calm, and every boat in it is facing the same way. Not toward
+      the sea. Not toward the town. Toward a spot on the water some
+      hundred yards out, where nothing floats.
+
+sailors_mission:
+  name: "The Sailors' Mission"
+  chapter: johansen
+  description_variants:
+    - >-
+      A whitewashed hall of hard benches, mugs of tea and hymn-books. A
+      handful of survivors sit apart from the others, in the way of men
+      who have seen something and cannot be argued out of it.
+    - >-
+      The stove burns steadily. On the wall a framed text reads THE SEA
+      SHALL GIVE UP ITS DEAD. Someone has crossed out GIVE and written,
+      in a shaking hand, KEEP.
+  exits:
+    south:
+      target: dunedin_docks
+  safe: true
+  rest_amount: 18
+  rest_text: >-
+    A woman in a grey apron puts a mug of scalding tea into your hands
+    and doesn't ask why they are shaking. For a while you are simply
+    warm.
+  scenery:
+    hymn-books: >-
+      The last page of each has been razored out. The chaplain, asked,
+      says only: "It said the same thing, over and over."
+
+alert_hulk:
+  name: "The Hulk of the Alert"
+  chapter: johansen
+  description_variants:
+    - >-
+      The Alert lies against a rotting pier, her masts gone and her hull
+      scarred by something that was not rock. The harbour master has
+      chained the gangway and left a sign. The chain has been cut from
+      the inside.
+    - >-
+      Below decks the air is cold and the timbers weep. Every seam of the
+      ship has been bent inward in the same direction, as though she had
+      been pulled through the eye of something very large and very
+      patient.
+  exits:
+    west:
+      target: dunedin_docks
+  risk_multiplier: 1.4
+  scenery:
+    hull: >-
+      The planks are bowed in curves no storm makes. Where the paint has
+      flaked, you can see that the wood underneath is faintly, unwholesomely
+      warm.
+    logbook: >-
+      The log's last pages are water-stained and half torn out. The final
+      legible entry: THE LAND IS WRONG. THE DOOR IS OPEN. THE DOOR IS
+      NOT A DOOR.
+
+# ============================== CHAPTER IV =============================
+
+ship_deck:
+  name: "The Deck of the Sloop"
+  chapter: rlyeh
+  description_variants:
+    - >-
+      The sloop rides at anchor in a sea gone flat and glassy as oil.
+      There are no birds. Ahead, a black shoal, and beyond it a
+      skyline of blocks and spires so regular that your eye keeps sliding
+      off and coming back a fraction to the left of where it was.
+    - >-
+      The captain won't come closer than this and won't turn his back on
+      the city either. He has lashed the wheel and sits with his knees to
+      his chest, muttering a sailor's prayer that has been reduced,
+      through use, to a rhythm.
+  exits:
+    east:
+      target: black_shoal
+  safe: true
+  rest_amount: 12
+  rest_text: >-
+    You wedge yourself into the lee of the deckhouse where the city is
+    out of the corner of your eye and not in the middle of it, and breathe.
+  scenery:
+    city: >-
+      You can't say how far away it is. It has no scale. It seems as close
+      as your own hand and as far as the stars, and it seems to be, very
+      slowly, getting closer.
+    captain: >-
+      "Three days," he says, without looking at you. "Three days, and I
+      sail. Whether you're aboard or not."
+
+black_shoal:
+  name: "The Black Shoal"
+  chapter: rlyeh
+  description_variants:
+    - >-
+      Black rock, slimed with green, breaks the surface in a long curved
+      spine. The skiff grounds on it with a sound like a knuckle cracking.
+      Underfoot, the surface has a faint, regular ridging - like the
+      ribs of some very large thing.
+    - >-
+      The tide is out, and out further than it should be, and the rock
+      beneath is scored with lines too straight to be natural and too
+      worn to be recent. You are, you realize, walking on a road.
+  exits:
+    west:
+      target: ship_deck
+    north:
+      target: cyclopean_quay
+  risk_multiplier: 1.3
+  scenery:
+    rock: >-
+      The grooves are wheel-ruts. The wheels, judging by the width, were
+      not for any vehicle you can picture, and belonged to something that
+      preferred to be pulled.
+
+cyclopean_quay:
+  name: "The Cyclopean Quay"
+  chapter: rlyeh
+  description_variants:
+    - >-
+      Slabs of masonry the size of houses stand tilted against one
+      another, green with slime and hung with weed. The quay is broad
+      enough to have berthed a fleet of vessels you do not want to
+      imagine. Nothing here was built to a human measure.
+    - >-
+      Every surface is engraved with a low-relief script, and every
+      figure in the script is doing the same thing: kneeling, facing
+      inward, toward a door.
+  exits:
+    south:
+      target: black_shoal
+    north:
+      target: slime_causeway
+  risk_multiplier: 1.4
+  scenery:
+    script: >-
+      You have never seen these characters, but the meaning arrives
+      anyway, at the base of your skull, the way a bad smell does. It is
+      not a warning. It is an invitation.
+
+slime_causeway:
+  name: "The Slime Causeway"
+  chapter: rlyeh
+  description_variants:
+    - >-
+      A raised road of green-black stone, slick with ooze that shines
+      faintly in its own light. The angles on either side of it don't
+      meet the way angles should; from one step to the next, the road
+      seems to bend toward and then away from a vanishing point.
+    - >-
+      The slime pulses very slightly underfoot, as if in time with
+      something asleep. You realize you are treading lightly to keep
+      from disturbing it, and that there is nothing to be gained by this.
+  exits:
+    south:
+      target: cyclopean_quay
+    north:
+      target: crooked_plaza
+  risk_multiplier: 1.5
+  scenery:
+    slime: >-
+      Green, greasy, faintly bioluminescent. Where you scuff it, the
+      pattern underneath is briefly visible: the same script, repeated,
+      each character a variation on the shape of a door.
+
+crooked_plaza:
+  name: "The Crooked Plaza"
+  chapter: rlyeh
+  description_variants:
+    - >-
+      An enormous square of black paving surrounded by tilted towers,
+      every one leaning at a different angle and every angle correct.
+      When you walk toward a building, it swings past you like the corner
+      of a fold in paper. A great door, to the north, stands wide.
+    - >-
+      Your shadow falls in three directions. The sky is not sky, but an
+      unbroken low overcast the color of a bruise. Every building looks
+      like a mouth that has stopped just short of speaking.
+  exits:
+    south:
+      target: slime_causeway
+    east:
+      target: obelisk_avenue
+    west:
+      target: tilted_arcade
+    north:
+      target: temple_gate
+      requires_clues: 14
+      locked_text: >-
+        The door is there. Your feet won't take you to it. The angles of
+        the great gate refuse to resolve for a mind that has not yet
+        understood enough to hold them - and you can feel, distinctly,
+        what it would cost to try.
+  risk_multiplier: 1.5
+  scenery:
+    door: >-
+      It is not a door. It has never been a door. Your mind insists on
+      the word because it has nothing else to put there. It is very
+      large, and it has been open for a long time, and it is not for you.
+    towers: >-
+      They lean like drunks in a photograph, each supporting the next.
+      None of them are supported by anything.
+
+obelisk_avenue:
+  name: "Obelisk Avenue"
+  chapter: rlyeh
+  description_variants:
+    - >-
+      A wide street lined with stepped obelisks the color of old
+      verdigris, their faces cut with columns of the same inhuman script.
+      Every column, as you walk, seems to rearrange itself to read a
+      little closer to English.
+    - >-
+      The obelisks rise higher than the buildings, and at their bases
+      the slime has been scoured off in long parallel scars, as if
+      something has been carried along here many times.
+  exits:
+    west:
+      target: crooked_plaza
+    east:
+      target: bone_gallery
+  risk_multiplier: 1.5
+  scenery:
+    obelisks: >-
+      Each face has a single line worn shiny by a hand, at chest height.
+      A man's chest height. Someone came here, and read, and did not
+      stop reading, and did not leave.
+
+tilted_arcade:
+  name: "The Tilted Arcade"
+  chapter: rlyeh
+  description_variants:
+    - >-
+      A long colonnade whose floor slopes one way and whose ceiling slopes
+      another, so that the whole thing feels like walking along the inside
+      of a seashell. At the far end, in a niche, someone has left a
+      sailor's kit bag.
+    - >-
+      The columns are carved as bundles of arms, hands lifted, each palm
+      a different shape and each finger too many. The air smells of cold
+      salt and something sweeter beneath it.
+  exits:
+    east:
+      target: crooked_plaza
+  risk_multiplier: 1.6
+  scenery:
+    columns: >-
+      Their hands are all open, and all turned upward: the posture of
+      supplicants. Between their fingers, where you'd expect to find
+      a candle or a flame, there is nothing but a very faint blue glow.
+
+bone_gallery:
+  name: "The Bone Gallery"
+  chapter: rlyeh
+  description_variants:
+    - >-
+      A vaulted room off the avenue, floored with drifts of pale bone,
+      and among the bones, rags of sailor's canvas and the remains of
+      lanterns. The crew of the Emma got this far. They didn't get back.
+    - >-
+      Someone has arranged the dead with care - laid out in rows, feet
+      toward the great door, hands folded - by someone else who then
+      couldn't bear to be the last one in the room.
+  exits:
+    west:
+      target: obelisk_avenue
+  risk_multiplier: 1.6
+  scenery:
+    bones: >-
+      They are not scattered. They are placed. Each skull faces the same
+      direction, toward the door. Not one of them shows any sign of a
+      wound.
+    lanterns: >-
+      Brass, salt-eaten, empty of oil. One is still faintly warm.
+
+temple_gate:
+  name: "The Great Door"
+  chapter: rlyeh
+  description_variants:
+    - >-
+      A gateway of a thousand tonnes of masonry, hung on a hinge that
+      turns at an angle unknown to geometry. Beyond it, a passage. Beyond
+      that, the air itself is different: quieter, older, and very slightly
+      warm.
+    - >-
+      The door has been open since the day the city rose. The carvings
+      around the jamb are of a single figure, again and again, rising by
+      degrees: from a kneeling shape to a standing one, to something with
+      wings.
+  exits:
+    south:
+      target: crooked_plaza
+    north:
+      target: vault_antechamber
+  risk_multiplier: 1.7
+  scenery:
+    carvings: >-
+      Each panel is the same shape, a little more awake than the one
+      before. The last panel is blank. The stone in it has been smoothed
+      away, deliberately, from the inside.
+
+vault_antechamber:
+  name: "The Vault Antechamber"
+  chapter: rlyeh
+  description_variants:
+    - >-
+      A low cyclopean hall whose walls are engraved with the mechanism of
+      the seal: interlocking figures, nested doors, a text that reads as
+      an instruction and, on a second reading, as a warning. The floor
+      slopes gently down toward a dark opening at the end.
+    - >-
+      The temperature climbs as you go forward. The slime here is warm and
+      dry. On every wall the same three columns of script repeat, and you
+      know without being told that reading them aloud is what wakes it,
+      and that reading them in the right order is what puts it back.
+  exits:
+    south:
+      target: temple_gate
+    down:
+      target: the_vault
+  risk_multiplier: 1.8
+  scenery:
+    text: >-
+      Three columns. The first is the chant, the words that call it. The
+      second, less worn, is the geometry that holds it. The third has
+      been chiselled out - and the marks of the chisel are recent.
+
+the_vault:
+  name: "The Vault of the Sleeper"
+  chapter: rlyeh
+  description_variants:
+    - >-
+      There is no floor, only a slope, and no ceiling, only a depth. The
+      Sleeper lies below, larger than a hill and quieter than a held
+      breath. It is dreaming. You are in its dream. It is, very
+      gently, becoming aware of the dream.
+    - >-
+      The dark has weight. Somewhere in the deep of it, a great slow
+      pulse - the rhythm you've been walking to since Providence. The
+      door to seal it is at your feet. Everything you've learned depends
+      on whether it's enough.
+  exits:
+    up:
+      target: vault_antechamber
+    down:
+      finale:
+        - min_clues: 18
+          result: win
+          text: >-
+            You know it all - the dreams in Providence, the chant in the
+            bayou, the sailor's last map, the geometry of the door - and
+            when you speak the words, they fit. Not as words, but as
+            angles. Stone moves that has not moved in ten thousand years.
+            The great slab rolls home with a sound like the closing of
+            the world's last book, and the slime dies on the walls, and the
+            green light goes out.
+
+
+            You don't remember the trip back. You remember a sloop, and a
+            captain who wouldn't look at you, and a slow grey dawn on an
+            ordinary sea. For a long time you will keep every lamp in your
+            house lit. But you sleep, eventually, and what you dream is
+            only a house, and a professor, and a note pinned to a door.
+
+
+            THE SLEEPER IS SEALED.
+        - min_clues: 15
+          result: win
+          text: >-
+            You have most of it. Not all, but enough - enough to begin the
+            seal, enough to know the last piece is missing, and that
+            someone will have to hold the door shut while it sets.
+
+            You are still holding it when the last of the light fails
+            above you. The city sinks around the vault, slowly, taking the
+            sloop's lantern with it. Beneath your hands the great slab
+            trembles, and holds, and goes on holding.
+
+
+            Somewhere far above, a sea closes over a place no chart will
+            ever show. In Providence, on a hill, a lamp goes out in a
+            study window. The Sleeper sleeps. You have made certain of it,
+            and you will be making certain of it for a very long time.
+
+
+            THE SLEEPER IS SEALED - AT A COST.
+        - result: lose
+          text: >-
+            You say the words. You have most of them right. That is the
+            trouble with most of them.
+
+            The stone moves, but not in the direction you intended, and the
+            slime brightens, and the door you meant to close goes on
+            opening all the way to the bottom of the dark. Far below you,
+            something that has been asleep for a very long time turns
+            over, and opens what it uses for eyes.
+
+
+            It is not angry. That is the worst of it. It is only, very
+            slowly, awake.
+
+
+            THE SLEEPER WAKES.
+  risk_multiplier: 2.0
+  scenery:
+    dark: >-
+      Not empty. Occupied. You'd swear it is looking at you, and you'd
+      swear it is not, and you'd swear the two are not different things.
+    slab: >-
+      A door in the floor of the world, and the seal you must set on it:
+      a ring of stone that must be turned by hands that know the sequence.
+      Your hands know only what you've learned.

@@ -1,0 +1,321 @@
+# Items for the "sleeper" scenario.
+# 20 clues (none of them individually mandatory - each chapter gate and the
+# finale are knowledge *thresholds*), 8 utility items (keys and curatives),
+# and a scenario-specific necronomicon. See manifest.yaml for the gates.
+#
+# Placement rule: every key/pass is placed in a room reachable BEFORE the
+# door it opens, and every clue in a room reachable in its own chapter, so
+# no random placement can soft-lock a run (tests/test_engine.py checks this
+# across many seeds).
+
+# ------------------------------ Chapter I -------------------------------
+
+angell_key:
+  name: "brass cabinet key"
+  description: "A small, old brass key on a loop of black thread."
+  valid_rooms: [angell_attic, angell_hall, angell_study]
+
+stacks_pass:
+  name: "reader's pass"
+  description: "A stiff card, stamped and signed: ADMIT BEARER TO THE RESTRICTED STACKS."
+  valid_rooms: [lecture_hall, thomas_street, fleur_de_lys]
+
+brandy_flask:
+  name: "brandy flask"
+  description: "A dented silver flask, still heavy. Your great-uncle's initials are scratched into it."
+  valid_rooms: [angell_hall, angell_study, thomas_street]
+  on_use_sanity: 30
+  on_use_text: >-
+    It burns all the way down, and for a moment the hall is only a hall
+    and the dark only dark.
+
+angell_manuscript:
+  name: "Angell's manuscript"
+  description: "A bundle of typed pages headed CULT OF CTHULHU, in your great-uncle's careful hand."
+  valid_rooms: [angell_cabinet]
+  on_take_sanity: -12
+  on_take_text: >-
+    He spent months on it. It gathers, from a dozen sources, the same
+    seven words in a dozen alphabets, and beneath them, in his hand:
+    THIS IS NOT MYTH. THESE PEOPLE BELIEVE IT IS COMING BACK.
+  is_clue: true
+
+bas_relief:
+  name: "clay bas-relief"
+  description: "A damp square of clay, a foot across, a nightmare pressed into it."
+  valid_rooms: [wilcox_studio, angell_study]
+  on_take_sanity: -12
+  on_take_text: >-
+    A figure squats on a slab, winged, many-limbed, its head a knot of
+    feelers. Below it, a line of characters you have never seen and can
+    somehow read. It was made by a man who had never, awake, seen what
+    he copied.
+  is_clue: true
+
+dream_journal:
+  name: "dream journal"
+  description: "A student's notebook, every page dated, every entry a variation on the same night."
+  valid_rooms: [wilcox_studio, fleur_de_lys]
+  on_take_sanity: -10
+  on_take_text: >-
+    Great stone, wet and green. A door that is not a door. And below
+    it, patient, something that does not sleep so much as wait. On the
+    last page, one line, over and over: CTHULHU FHTAGN. CTHULHU FHTAGN.
+  is_clue: true
+
+tobey_notes:
+  name: "Dr. Tobey's case notes"
+  description: "A physician's clinical notes on a patient with a fever that was not a fever."
+  valid_rooms: [fleur_de_lys, thomas_street, lecture_hall]
+  on_take_sanity: -8
+  on_take_text: >-
+    "Patient's raving coincides across all observed cases with a single
+    week in March. The professor's hypothesis, that the dreamers were
+    responding to an external event, no longer sounds mad. It sounds
+    like a diagnosis."
+  is_clue: true
+
+society_minutes:
+  name: "society minutes"
+  description: "The printed proceedings of a learned society, one meeting flagged with a slip of paper."
+  valid_rooms: [lecture_hall, athenaeum]
+  on_take_sanity: -8
+  on_take_text: >-
+    A police inspector from New Orleans, a small green idol, a room of
+    learned men unable to name it. And one man, Webb, who could - from
+    a Greenland tribe that had said it was old before the ice was.
+  is_clue: true
+
+webb_monograph:
+  name: "Webb's monograph"
+  description: "A slim, privately printed monograph on an Arctic cult, now withdrawn from every other collection on earth."
+  valid_rooms: [athenaeum_stacks]
+  on_take_sanity: -12
+  on_take_text: >-
+    The tribe's chant, transliterated, is the same you saw scrawled
+    in the studio: Ph'nglui mglw'nafh Cthulhu R'lyeh wgah'nagl fhtagn.
+    In his house at R'lyeh, dead Cthulhu waits dreaming.
+  is_clue: true
+
+# ------------------------------ Chapter II ------------------------------
+
+evidence_key:
+  name: "evidence room key"
+  description: "A flat steel key on a numbered tag."
+  valid_rooms: [police_hq, legrasse_office, french_quarter, dockside_tavern]
+
+rum_flask:
+  name: "flask of rum"
+  description: "A bottle of the local rum, cloudy and strong."
+  valid_rooms: [dockside_tavern, boarding_house, french_quarter]
+  on_use_sanity: 25
+  on_use_text: >-
+    You swallow a mouthful of liquid fire. The bayou noises fall back to
+    a sensible distance, at least for now.
+
+legrasse_report:
+  name: "Legrasse's report"
+  description: "A police report, typed, then annotated in longhand until the margins vanish."
+  valid_rooms: [legrasse_office, police_hq]
+  on_take_sanity: -10
+  on_take_text: >-
+    A raid on a swamp ritual. Nearly a hundred captured; the rest fled or
+    were not, afterward, to be found. The prisoners all said the same
+    thing: they were the last of an order that had been waiting since
+    before the stars, for the stars to be right.
+  is_clue: true
+
+greenstone_idol:
+  name: "greenstone idol"
+  description: "A small figure carved from a green stone no geologist could name, sweating faintly."
+  valid_rooms: [evidence_room]
+  on_take_sanity: -15
+  on_take_text: >-
+    It sits in your palm like an accusation: a squat winged thing, a head
+    of feelers, a base of hieroglyphs. Its stone is cold, but it feels,
+    unmistakably, like it is pressing back.
+  is_clue: true
+
+castro_testimony:
+  name: "Castro's testimony"
+  description: "A statement taken down in police shorthand, from a very old man."
+  valid_rooms: [dockside_tavern, police_hq, boarding_house]
+  on_take_sanity: -10
+  on_take_text: >-
+    "They worshipped the Great Old Ones, who came from the sky long
+    before there was any man. They are not dead, only waiting. They
+    will rise when the stars are right - and there are others who
+    will free them, if the cult is not stopped."
+  is_clue: true
+
+ritual_chant:
+  name: "transcribed chant"
+  description: "A rubbing of the monolith's face, made in the dark by someone whose hand was shaking."
+  valid_rooms: [cultist_clearing, monolith]
+  on_take_sanity: -12
+  on_take_text: >-
+    The characters shift as you read, then settle on a meaning: a
+    summoning, but also - here, halfway down - a caution. The chant that
+    calls the sleeper is the same chant that, chanted backward and in the
+    right order, sends him down.
+  is_clue: true
+
+squatters_account:
+  name: "squatters' account"
+  description: "A crumpled page torn from a child's exercise book, covered in a frightened scrawl."
+  valid_rooms: [fishing_shack, bayou_road]
+  on_take_sanity: -8
+  on_take_text: >-
+    "They came in the night. Drums, and then silence, and then the whole
+    swamp was singing. Daddy said not to look. I looked. I am writing
+    this so someone will know it looked back."
+  is_clue: true
+
+annotated_pages:
+  name: "annotated pages"
+  description: "A handful of pages torn from an old book, with notes in three different hands."
+  valid_rooms: [occult_bookshop, boarding_house]
+  on_take_sanity: -10
+  on_take_text: >-
+    The margin notes contradict the text and each other, but one line
+    is underlined in all three hands: "It cannot die. It can only be
+    made to sleep again, and only by someone who knows how the door
+    closes."
+  is_clue: true
+
+# ------------------------------ Chapter III -----------------------------
+
+study_key:
+  name: "study key"
+  description: "A plain iron key, scratched and dull, on a loop of fishing line."
+  valid_rooms: [johansen_house, oslo_street, maritime_archive]
+
+aquavit_flask:
+  name: "flask of aquavit"
+  description: "A small flask of clear spirit, tasting of caraway and cold."
+  valid_rooms: [oslo_street, sailors_mission, oslo_quay]
+  on_use_sanity: 25
+  on_use_text: >-
+    Cold, clean fire. It steadies your hands, and the Norwegian dark
+    seems a good deal less interested in you for a while.
+
+johansen_manuscript:
+  name: "Johansen's manuscript"
+  description: "Pages in Norwegian, later translated, in a hand that gets worse toward the end."
+  valid_rooms: [johansen_study]
+  on_take_sanity: -15
+  on_take_text: >-
+    The Emma. The Alert. A shore of lifted slime and cyclopean stone. A
+    door opened by a touch, and a shape that came through it that was
+    the size of a hill. "I do not understand," he writes, "why it did not
+    take us all. I understand only that it does not need to hurry."
+  is_clue: true
+
+widows_letter:
+  name: "widow's letter"
+  description: "A letter addressed to no one, left on the hall table for whoever came."
+  valid_rooms: [johansen_house, oslo_street]
+  on_take_sanity: -8
+  on_take_text: >-
+    "He came home, but never all the way. He would not sleep. He would
+    not let the lamps be put out. When he died, there was no wound, and
+    no illness. The doctor said he had simply, at last, gone to sleep."
+  is_clue: true
+
+rlyeh_coordinates:
+  name: "chart of the southern Pacific"
+  description: "A navigation chart, one small square inked over and over until it wore through."
+  valid_rooms: [maritime_archive, oslo_street]
+  on_take_sanity: -10
+  on_take_text: >-
+    47 degrees, 9 minutes south; 126 degrees, 43 minutes west. Nothing is
+    there on any other chart. It is the middle of a very great deal of
+    empty water. It is where, someone has written in tiny script, THE
+    LAND STOPS BEING LAND.
+  is_clue: true
+
+alert_log:
+  name: "log of the Alert"
+  description: "A salt-stiffened ship's log, its last pages torn out and reinserted upside down."
+  valid_rooms: [alert_hulk]
+  on_take_sanity: -12
+  on_take_text: >-
+    The log tracks the ship's approach to a landfall, then its
+    abandonment. "The men would not stop looking at it. Angles that
+    would not close. When Donovan touched the door it swung open as
+    though it had only ever been waiting."
+  is_clue: true
+
+sailors_testimony:
+  name: "sailors' testimony"
+  description: "A sheaf of signed statements from the crew of the Alert, gathered by the mission chaplain."
+  valid_rooms: [sailors_mission, dunedin_docks]
+  on_take_sanity: -8
+  on_take_text: >-
+    Six men, six accounts, one shape. "It came through the door like
+    smoke through a keyhole, and it was not a thing that had been
+    shut in. It was a thing that had been shut out, and was coming
+    home."
+  is_clue: true
+
+# ------------------------------ Chapter IV ------------------------------
+
+grog_flask:
+  name: "flask of ship's grog"
+  description: "The captain's own flask, pressed into your hand at the rail without a word."
+  valid_rooms: [ship_deck, black_shoal]
+  on_use_sanity: 30
+  on_use_text: >-
+    Sweet, harsh and warm. For the space of a swallow the horizon
+    is a horizon, and the dark under it is just water.
+
+crew_journal:
+  name: "crew journal"
+  description: "A last journal in a tin cylinder, wedged in a rib of stone by one of the Emma's crew."
+  valid_rooms: [bone_gallery]
+  on_take_sanity: -12
+  on_take_text: >-
+    "We are not dead, we are only arranged. Someone came through after
+    us and set us in rows. It was so kind of them. It was so careful."
+  is_clue: true
+
+basalt_rubbing:
+  name: "basalt rubbing"
+  description: "A charcoal rubbing of a single column of the city's script, made on a sailor's shirt."
+  valid_rooms: [obelisk_avenue, tilted_arcade]
+  on_take_sanity: -12
+  on_take_text: >-
+    The characters lie flat on the cloth, and for the first time they
+    read in order: a sequence, thirteen movements, ending in a
+    single closing gesture. It is not a spell. It is a set of directions.
+  is_clue: true
+
+sealing_diagram:
+  name: "sealing diagram"
+  description: "A geometric drawing, chiselled into a slab and lifted by a trembling hand onto a scrap of canvas."
+  valid_rooms: [tilted_arcade, vault_antechamber]
+  on_take_sanity: -15
+  on_take_text: >-
+    A door drawn as a lock and a lock drawn as a mind. Rings within
+    rings, and at the centre, a place for a hand. It is a diagram of
+    how to end something. You understand, with cold dread, that
+    it was drawn by someone who had.
+  is_clue: true
+
+# --------------------------- The necronomicon ---------------------------
+
+necronomicon:
+  name: "necronomicon"
+  description: >-
+    A Latin-language edition, in a binding of something that was never
+    calf. You can tell, just holding it, that skimming it is one thing
+    and actually reading it is another - and that the second one isn't a
+    decision you get to take back. Reading it costs roughly half of
+    whatever sanity you have left, leaves you unable to recover any more
+    of it for the rest of this attempt, and grants the equivalent of two
+    clues in return. There's no reading it partway.
+  valid_rooms: [athenaeum_stacks, occult_bookshop, johansen_study]
+  on_take_sanity: -12
+  on_take_text: >-
+    It falls open to a page of geometry that hurts the eyes. You close
+    it, and the shapes stay behind your eyelids for a very long time.

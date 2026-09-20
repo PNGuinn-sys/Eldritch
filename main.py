@@ -111,7 +111,9 @@ def match_item(target, item_ids, scenario, prefer_ids=None):
         return None
     word_matches = []
     for item_id in item_ids:
-        name = scenario.items[item_id]["name"]
+        # The parser lowercases what the player types, so compare
+        # case-insensitively - item names may contain proper nouns.
+        name = scenario.items[item_id]["name"].lower()
         if target == name or target == item_id:
             return item_id
         if target in name.split():
@@ -320,6 +322,7 @@ def handle_command(cmd, player: Player, rooms: dict, events: list, rng, scenario
             scenery = room.get("scenery", {})
             scenery_text = None
             for noun, text in scenery.items():
+                noun = noun.lower()
                 if cmd.target == noun or cmd.target in noun.split():
                     scenery_text = text
                     break

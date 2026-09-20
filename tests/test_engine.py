@@ -1263,9 +1263,16 @@ def test_cli_load_resumes_a_saved_game_end_to_end():
 # --- Chapters: knowledge gates, travel text, tiered endings, per-chapter threats ---
 
 class _NoDread:
-    """RNG stub that never rolls a hit (no dread, no events)."""
+    """RNG stub that never rolls a hit (no dread, no events). Also answers
+    the other calls narration distortion can make at low sanity."""
     def random(self):
         return 0.99
+
+    def choice(self, seq):
+        return seq[0]
+
+    def randrange(self, start, stop=None):
+        return start
 
 
 class _AlwaysDread:
@@ -1491,6 +1498,240 @@ def test_malformed_chapters_block_is_a_clear_scenario_error():
             assert "'chapters' must be a mapping" in str(e)
         else:
             raise AssertionError("expected ScenarioError")
+
+
+def test_items_and_scenery_with_capitals_can_be_named_by_the_player():
+    """The parser lowercases input, so a proper-noun item name like
+    "Angell's manuscript" must still be takeable by its full on-screen name
+    (found by the whole-scenario bot below)."""
+    import main as game_main
+    from game.player import Player
+
+    scenario = Scenario(
+        name="t", title="t", description="", start_room="a", rooms={}, events=[],
+        items={"ms": {"name": "Angell's manuscript"}, "key": {"name": "Brass Key"}},
+    )
+    rooms = {"a": {"name": "A", "description": "d", "exits": {}, "items": [],
+                   "scenery": {"Old Lamp": "A lamp."}}}
+    player, rng = Player(location="a"), _NoDread()
+
+    for typed, expected in (("take angell's manuscript", ["ms"]), ("take manuscript", ["ms"]),
+                            ("take brass key", ["key"]), ("take key", ["key"])):
+        rooms["a"]["items"], player.inventory = ["ms", "key"], []
+        _quiet(game_main.handle_command, parse(typed), player, rooms, [], rng, scenario)
+        assert player.inventory == expected, typed
+
+    _, out = _quiet(game_main.handle_command, parse("examine old lamp"), player, rooms, [], rng, scenario)
+    assert "A lamp." in out
+
+
+# --- Whole-scenario checks: winnability & a bot that plays every scenario ------------
+
+SHIPPED_SCENARIOS = ("manor", "hollow_tide", "reanimator", "sleeper")
+
+
+def _collectable_closure(scenario, rooms):
+    """Greedy over-approximation of everything a player could ever collect
+    and reach: keep picking up items in reachable rooms and following any
+    exit the inventory currently allows. (Within a chapter rooms connect
+    both ways, so this matches what a careful player can actually do.)"""
+    inv, reach = set(), {scenario.start_room}
+    changed = True
+    while changed:
+        changed = False
+        clues = sum(1 for i in inv if scenario.items[i].get("is_clue"))
+        for room_id in list(reach):
+            room = rooms[room_id]
+            for item in room["items"]:
+                if item not in inv:
+                    inv.add(item)
+                    changed = True
+            for info in room["exits"].values():
+                target = info.get("target")
+                if not target or target in reach:
+                    continue
+                if info.get("locked") and info.get("unlock_item") not in inv:
+                    continue
+                if info.get("requires_clues") and clues < info["requires_clues"]:
+                    continue
+                reach.add(target)
+                changed = True
+    return reach, inv
+
+
+def test_every_shipped_scenario_is_structurally_winnable_for_many_seeds():
+    """Random item placement must never soft-lock a run: for each seed,
+    every room and every clue must be obtainable and an ending reachable."""
+    for name in SHIPPED_SCENARIOS:
+        scenario = load_scenario(PROJECT_ROOT / "data" / name)
+        total_clues = sum(1 for t in scenario.items.values() if t.get("is_clue"))
+        for seed in range(100):
+            rng, _ = make_rng(seed)
+            rooms = generate_world(scenario, rng)
+            reach, inv = _collectable_closure(scenario, rooms)
+            found = sum(1 for i in inv if scenario.items[i].get("is_clue"))
+            has_ending = any(
+                e.get("finale") or e.get("requires_all_clues")
+                for r in reach for e in rooms[r]["exits"].values()
+            )
+            assert has_ending, (name, seed, "no ending reachable")
+            assert found == total_clues, (name, seed, f"only {found}/{total_clues} clues collectable")
+            assert reach == set(scenario.rooms), (name, seed, sorted(set(scenario.rooms) - reach))
+
+
+def _play_to_the_end(scenario, seed, max_steps=4000):
+    """A simple bot that plays a scenario with real commands: clears each
+    chapter of items (never leaving one early), unlocks what it can, then
+    moves on and finally takes the ending. Returns (outcome, player, text)."""
+    from collections import deque
+    import main as game_main
+
+    player, rooms, events, _ = _fresh_game(scenario, seed=seed)
+    stub, log = _NoDread(), []
+
+    def do(line):
+        outcome, out = _quiet(game_main.handle_command, parse(line), player, rooms, events, stub, scenario)
+        log.append(out)
+        return outcome
+
+    def traversable(info):
+        if "target" not in info:
+            return False
+        if info.get("locked") and not player.has_item(info.get("unlock_item")):
+            return False
+        return not game_main.gate_unmet(info, player, scenario)
+
+    def bfs(goal, same_chapter_only=False):
+        here = rooms[player.location].get("chapter")
+        queue, seen = deque([(player.location, [])]), {player.location}
+        while queue:
+            room_id, path = queue.popleft()
+            if path and goal(room_id):
+                return path
+            for direction, info in rooms[room_id]["exits"].items():
+                target = info.get("target")
+                if not traversable(info) or target in seen:
+                    continue
+                if same_chapter_only and rooms[target].get("chapter") != here:
+                    continue
+                seen.add(target)
+                queue.append((target, path + [direction]))
+        return None
+
+    def ending_direction(room):
+        return next((d for d, i in room["exits"].items() if i.get("finale") or i.get("requires_all_clues")), None)
+
+    for _ in range(max_steps):
+        room = rooms[player.location]
+        while room.get("safe") and player.sanity < player.max_sanity and not player.regeneration_disabled:
+            do("rest")                                                      # as a real player would
+        for item_id in list(room["items"]):
+            do(f"take {scenario.items[item_id]['name']}")
+        for info in room["exits"].values():
+            if info.get("locked") and player.has_item(info.get("unlock_item")):
+                do(f"use {scenario.items[info['unlock_item']]['name']}")
+
+        has_items = lambda r: bool(rooms[r]["items"])
+        path = bfs(has_items, same_chapter_only=True)                       # finish this chapter first
+        if path is None:
+            path = bfs(lambda r: r not in player.visited)                   # then move on
+        if path is None:
+            direction = ending_direction(rooms[player.location])
+            if direction is None:
+                path = bfs(lambda r: ending_direction(rooms[r]) is not None)
+                assert path is not None, f"{scenario.name} seed {seed}: bot is stuck in {player.location}"
+            else:
+                outcome = do(f"go {direction}")
+                return outcome, player, "".join(log)
+        do(f"go {path[0]}")
+    raise AssertionError(f"{scenario.name} seed {seed}: bot didn't finish in {max_steps} steps")
+
+
+def test_a_bot_can_play_every_shipped_scenario_to_a_win():
+    for name in SHIPPED_SCENARIOS:
+        scenario = load_scenario(PROJECT_ROOT / "data" / name)
+        for seed in (1, 2, 3):
+            outcome, player, _ = _play_to_the_end(scenario, seed)
+            assert outcome == "win", (name, seed, outcome)
+
+
+def test_sleeper_bot_run_hits_every_chapter_and_the_best_ending():
+    scenario = load_scenario(PROJECT_ROOT / "data" / "sleeper")
+    outcome, player, text = _play_to_the_end(scenario, seed=7)
+    assert outcome == "win"
+    for banner in ("PART I - THE HORROR IN CLAY", "PART II - THE TALE OF INSPECTOR LEGRASSE",
+                   "PART III - JOHANSEN'S NARRATIVE", "PART IV - R'LYEH"):
+        assert banner in text, banner
+    assert text.index("PART I -") < text.index("PART II -") < text.index("PART III -") < text.index("PART IV -")
+    assert "The train pulls out of Providence" in text and "THE SLEEPER IS SEALED." in text
+    assert "AT A COST" not in text and player.chapter == "rlyeh"
+    clues = sum(1 for i in player.inventory if scenario.items[i].get("is_clue"))
+    assert clues == 20
+
+
+# --- The Sleeper Below: structure & endings -------------------------------------------
+
+def test_sleeper_scenario_structure():
+    from collections import Counter
+    s = load_scenario(PROJECT_ROOT / "data" / "sleeper")
+    assert validate_scenario(s) == []
+    order = ["providence", "new_orleans", "johansen", "rlyeh"]
+    assert list(s.chapters) == order
+    assert len(s.rooms) == 45
+    assert Counter(r["chapter"] for r in s.rooms.values()) == {
+        "providence": 12, "new_orleans": 14, "johansen": 8, "rlyeh": 11}
+    assert all(r.get("chapter") for r in s.rooms.values())          # every room belongs to a chapter
+
+    clue_ids = [i for i, t in s.items.items() if t.get("is_clue")]
+    assert len(clue_ids) == 20
+    per_chapter = Counter(s.rooms[t["valid_rooms"][0]]["chapter"] for i, t in s.items.items() if t.get("is_clue"))
+    assert per_chapter == {"providence": 6, "new_orleans": 6, "johansen": 5, "rlyeh": 3}
+    # A clue's placement pool never straddles chapters (or a one-way trip could strand it).
+    for i in clue_ids:
+        assert len({s.rooms[r]["chapter"] for r in s.items[i]["valid_rooms"]}) == 1, i
+
+    gates = sorted(e["requires_clues"] for r in s.rooms.values() for e in r["exits"].values() if "requires_clues" in e)
+    assert gates == [4, 9, 13, 14]
+
+    # Chapter travel is one-way: no exit ever leads back to an earlier chapter.
+    rank = {c: n for n, c in enumerate(order)}
+    for room_id, room in s.rooms.items():
+        for direction, info in room["exits"].items():
+            if info.get("target"):
+                assert rank[s.rooms[info["target"]]["chapter"]] >= rank[room["chapter"]], (room_id, direction)
+
+    # Each chapter has its own threat flavor, and R'lyeh is the fiercest.
+    flavors = {c: s.chapter_threats[c]["caught_text"] for c in order}
+    assert len(set(flavors.values())) == 4
+    assert s.chapter_threats["rlyeh"]["threshold"] < s.chapter_threats["providence"]["threshold"]
+    assert s.chapter_threats["rlyeh"]["chance_by_tier"]["lucid"] > s.threat["chance_by_tier"]["lucid"]
+
+
+def test_sleeper_finale_tiers():
+    s = load_scenario(PROJECT_ROOT / "data" / "sleeper")
+    cases = [(20, "win", "THE SLEEPER IS SEALED."), (18, "win", "THE SLEEPER IS SEALED."),
+             (17, "win", "AT A COST"), (15, "win", "AT A COST"),
+             (14, "lose", "THE SLEEPER WAKES."), (0, "lose", "THE SLEEPER WAKES.")]
+    for clues, result, marker in cases:
+        player, rooms, events, _ = _fresh_game(s, seed=1)
+        player.location, player.bonus_clues = "the_vault", clues
+        outcome, out = _step(s, player, rooms, events, "go down")
+        assert outcome == result, (clues, outcome)
+        assert marker in out, (clues, out[-200:])
+        assert (clues >= 18) == ("AT A COST" not in out and "SEALED" in out and "WAKES" not in out) or clues < 18
+
+
+def test_sleeper_gates_hold_until_the_knowledge_is_there():
+    s = load_scenario(PROJECT_ROOT / "data" / "sleeper")
+    for room_id, direction, need in (("providence_station", "south", 4), ("nola_harbor", "east", 9),
+                                     ("dunedin_docks", "out", 13), ("crooked_plaza", "north", 14)):
+        player, rooms, events, _ = _fresh_game(s, seed=1)
+        player.location, player.bonus_clues = room_id, need - 1
+        _step(s, player, rooms, events, f"go {direction}")
+        assert player.location == room_id, (room_id, "let the player through early")
+        player.bonus_clues = need
+        _step(s, player, rooms, events, f"go {direction}")
+        assert player.location != room_id, (room_id, "still blocked with enough clues")
 
 
 def run_all():

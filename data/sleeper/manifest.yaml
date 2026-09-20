@@ -1,0 +1,160 @@
+# Manifest for the "sleeper" scenario: "The Sleeper Below".
+#
+# Eldritch's largest scenario, and the first with chapters. It follows the
+# shape of Lovecraft's "The Call of Cthulhu" (1926, public domain): an
+# inheritance of papers in Providence, a trail to New Orleans and the
+# bayou, a dead sailor's manuscript in Oslo, and finally the drowned city
+# itself. Each chapter is a knowledge gate - you can only move on once you
+# understand enough - and the finale's ending depends on how much of the
+# whole picture you assembled.
+#
+# 45 rooms, 20 clues, four chapters:
+#   I   The Horror in Clay        Providence         12 rooms, 6 clues, gate: 4
+#   II  The Tale of Legrasse      New Orleans/bayou  14 rooms, 6 clues, gate: 9 total
+#   III Johansen's Narrative      Oslo / Dunedin      8 rooms, 5 clues, gate: 13 total
+#   IV  R'lyeh                    the drowned city   11 rooms, 3 clues, temple gate: 14 total
+# Finale: 18+ clues seals Him fully, 15+ seals Him at a cost, less and He wakes.
+#
+# Travel between chapters is one-way (there's no return exit), so clearing
+# a chapter before leaving it matters: you can miss at most 2 clues
+# (or read the necronomicon, worth +2).
+
+title: "The Sleeper Below"
+description: >
+  A dead professor's papers lead from Providence to the bayous of
+  Louisiana to a sailor's confession in Oslo, and finally to a city that
+  should never have surfaced - where the only way to stop what sleeps
+  there is to have understood all of it.
+start_room: angell_hall
+intro: >-
+  Your great-uncle, Professor George Gammell Angell, died the way old men
+  do: suddenly, on a steep street near the wharves, after a stumble no one
+  quite saw. He left you his house, his papers, and a note pinned to the
+  door of a locked cabinet in his study.
+
+  BURN THESE, it says. Or finish them.
+
+# Tuned so a full clear costs roughly 85-90% of the pool before any rests,
+# in line with the other scenarios (game/balance.py scales the individual
+# costs down to its 0.35 floor at this size, so the pool is sized to match).
+max_sanity: 120
+
+chapters:
+  providence:
+    title: "PART I - THE HORROR IN CLAY"
+    intro: >-
+      Providence, and a dead man's unfinished work. Somewhere in these
+      papers is the reason a sensible scholar spent his last winter
+      collecting nightmares.
+    threat:
+      threshold: 4
+      manifest_text: >-
+        Someone is standing just beyond the reach of the light - a figure
+        too still, too tall, its outline not quite agreeing with itself.
+        It hasn't moved since you noticed it. It has, you realize, been
+        there for some time.
+      caught_text: >-
+        It doesn't approach. The light simply goes out, and stays out, and
+        the shape in the dark is suddenly on the near side of it.
+
+
+        You are not found. Not by anyone who could still help.
+      evade_text: "You go, and don't look back to see whether the shape follows."
+      hide_text: >-
+        You press into a doorway and let the dark keep you. After a long
+        moment the street exhales, and the shape is only a lamppost.
+
+  new_orleans:
+    title: "PART II - THE TALE OF INSPECTOR LEGRASSE"
+    intro: >-
+      The South, wet and loud and old. A police inspector once brought a
+      small green idol to a room full of learned men and asked them what
+      it was. None of them could say. He knew what it was called.
+    threat:
+      threshold: 3
+      manifest_text: >-
+        The drums are close now - close enough to feel in your teeth - and
+        between the trees and doorways shapes are moving that are too many,
+        and too coordinated, to be anything but a congregation.
+      caught_text: >-
+        Hands take you from every side, gently, the way a congregation
+        receives one of its own. The drums never change their rhythm.
+
+
+        You are not found. Not by anyone who could still help.
+      evade_text: "You run. The drums do not hurry; they don't need to."
+      hide_text: >-
+        You go flat in the dark and breathe through your sleeve. The
+        drumming passes on, unhurried, looking for someone easier to find.
+
+  johansen:
+    title: "PART III - JOHANSEN'S NARRATIVE"
+    intro: >-
+      A Norwegian sailor survived what the rest of his crew did not, wrote
+      it down, and died within the year of nothing anyone could name. His
+      account is the only one from someone who has stood in the place you
+      are now trying to reach.
+    threat:
+      threshold: 3
+      manifest_text: >-
+        Every window goes flat and dark like water, and something heavy and
+        wet has begun to climb the stairs - unhurried, dripping, and
+        certain of its way.
+      caught_text: >-
+        The drip stops beside you. It smells of low tide, and of a very
+        long time spent in the dark.
+
+
+        You are not found. Not by anyone who could still help.
+      evade_text: "You leave, and the dripping follows for a long time."
+      hide_text: >-
+        You hold still until your ears ring. The dripping pauses beside
+        you, considers, and moves on toward the harbor.
+
+  rlyeh:
+    title: "PART IV - R'LYEH"
+    intro: >-
+      The city was never built for people. Its angles disagree with each
+      other and its stone is the wrong green. Something in it is dreaming,
+      and the dream has been reaching for you since Providence.
+    threat:
+      threshold: 2
+      chance_by_tier:
+        lucid: 0.28
+        uneasy: 0.40
+        fraying: 0.55
+        broken: 0.70
+      manifest_text: >-
+        A wall folds open where there was no wall, and something that the
+        dreaming thing left walking comes through it, wearing the
+        proportions of a shape you almost recognize.
+      caught_text: >-
+        It doesn't reach for you. It simply arrives, the way the tide
+        arrives, and the dream you have been having since Providence
+        finally has a place to put you.
+
+
+        You are not found. Not by anyone who could still help.
+      evade_text: "You run, and the city rearranges itself behind you to make the way shorter."
+      hide_text: >-
+        You go still in a corner whose angle you refuse to look at. The
+        thing passes, tasting the air, and the geometry lets it go.
+
+# Baseline threat, used for any room that has no chapter (there are none
+# now, but a new room should still behave sensibly until it gets one).
+threat:
+  threshold: 3
+  chance_by_tier:
+    lucid: 0.12
+    uneasy: 0.24
+    fraying: 0.38
+    broken: 0.55
+
+broken_text: >-
+  The proportions of the room settle into a shape you understand
+  perfectly, and cannot explain, and will never again be able to stop
+  drawing on any surface that will hold still for you.
+
+
+  They find you sometime later, kneeling over a sketch of a great door,
+  smiling.

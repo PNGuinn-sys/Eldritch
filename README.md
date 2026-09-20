@@ -3,9 +3,10 @@
 
 > *"The most merciful thing in the world, I think, is the inability of the human mind to correlate all its contents."*
 
-**Status:** 🏚️🌊🔪 Three distinct, fully data-driven scenarios — "The Manor,"
-"Hollow Tide," and "The Reagent" — plus a scenario-selection menu, proving
-the engine scales in size, personality, and content across adventures
+**Status:** 🏚️🌊🔪 Four distinct, fully data-driven scenarios — "The Manor,"
+"Hollow Tide," "The Reagent," and the chaptered epic "The Sleeper Below" —
+plus a scenario-selection menu, proving the engine scales in size,
+personality, and content across adventures
 **Working title** — open to renaming once the story takes shape.
 
 ---
@@ -39,6 +40,17 @@ already know too much.
   complicit assistant. 12 rooms, 7 clues (6 needed), 2 locked doors,
   a 150-point sanity pool, and its own threat: the reanimated dead
   themselves, stiff-moving and unreliable-sensed.
+
+- **The Sleeper Below** (`--scenario sleeper`) — the largest and the first
+  with chapters, following the shape of Lovecraft's "The Call of Cthulhu"
+  (public domain, 1926): a dead professor's papers in Providence, a trail
+  to New Orleans and the bayou, a sailor's manuscript in Oslo and Dunedin,
+  and finally R'lyeh itself. 45 rooms across four chapters, 20 clues, and
+  each chapter is a knowledge gate you can only pass by having learned
+  enough. Travel between chapters is one-way, each chapter has its own
+  threat, and the finale has three endings (a full seal, a seal at a cost,
+  or the Sleeper waking) depending on how much of the whole picture you
+  assembled.
 
 Every scenario uses the exact same engine, unmodified — only the data
 files differ, right down to how their stalking threats look, feel, and
@@ -170,6 +182,10 @@ mid-playthrough.
   and can be safely previewed via `examine` before the player decides
   whether to actually `use` (read) it: +2 clues, at the cost of half
   their current sanity and all future sanity recovery that run ✅
+- **Chapters, knowledge gates & tiered endings** — a scenario can be a
+  multi-part story: one-way travel between chapters that unlock only once
+  you've gathered enough clues, per-chapter threats, and a finale whose
+  outcome depends on how much you learned ✅
 - **Fully re-skinnable per scenario** — sanity pool size, clue threshold,
   and the stalking threat's pacing/flavor text are all scenario-configurable,
   not hardcoded ✅
@@ -211,6 +227,8 @@ eldritch/
 │   │   └── (same four files, 22 rooms)
 │   ├── reanimator/           # Scenario 3: "The Reagent" - a Herbert West-inspired case
 │   │   └── (same four files, 12 rooms)
+│   ├── sleeper/              # Scenario 4: "The Sleeper Below" - 45 rooms, four chapters
+│   │   └── (same four files)
 │   └── _template/            # Minimal, fully working, heavily-commented
 │       └── (same four files)   # starting point for a new scenario
 ├── tests/
@@ -267,7 +285,8 @@ Available scenarios:
   1. Hollow Tide
   2. The Manor
   3. The Reagent
-  4. Random
+  4. The Sleeper Below
+  5. Random
 
 Choose a scenario (number):
 ```
@@ -287,6 +306,11 @@ exactly what's wrong, rather than crashing mid-playthrough.
 ```bash
 python tests/test_engine.py
 ```
+
+Beyond unit tests of the parser, sanity, save/load and loader, the suite
+checks every shipped scenario as a whole: that random item placement can
+never soft-lock a run (across 100 seeds each), and that a bot can play each
+one from start to a win using real commands.
 
 ## How to Play
 
@@ -338,7 +362,11 @@ manifests and your next move isn't fleeing or hiding.
       new items required) and repeatable ambient events (vs. one-shot
       story beats)
 - [x] Save/load system
-- [ ] More rooms, more clues, more puzzles in either scenario
+- [x] Chapters: knowledge-gated one-way travel, per-chapter threats and
+      tiered endings, proven by "The Sleeper Below" (45 rooms, the largest)
+- [x] Whole-scenario tests: every shipped scenario is checked to be
+      winnable across many random seeds, and a bot plays each one to a win
+- [ ] More rooms, more clues, more puzzles in the older scenarios
 - [ ] Additional/varied endings beyond win/caught/broken
 - [ ] Polish — styling, pacing
 

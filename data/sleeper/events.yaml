@@ -1,0 +1,130 @@
+# Random events for the "sleeper" scenario. Most are one-shot story beats;
+# a handful are marked repeat: true for ambient dread that can recur across
+# a long playthrough. Grouped by chapter.
+
+# ------------------------------ Chapter I -------------------------------
+
+- id: dream_residue
+  rooms: [angell_hall, angell_study, angell_attic]
+  chance: 0.35
+  text: "For a moment the house tilts, as if you had stepped off a curb that wasn't there. The feeling passes. The memory of a great wet door does not."
+  sanity_effect: -8
+
+- id: clay_is_warm
+  rooms: [wilcox_studio]
+  chance: 0.45
+  text: "The clay on the easel is warm. Not from the room. From within, the way a sleeping animal is warm."
+  sanity_effect: -10
+
+- id: angells_handwriting
+  rooms: [angell_study, angell_cabinet]
+  chance: 0.3
+  text: "A page you swear you'd read a minute ago has a new line at the bottom, in your great-uncle's hand: HE KNOWS YOU'RE HERE."
+  sanity_effect: -8
+
+- id: watched_on_the_hill
+  rooms: [college_street, thomas_street]
+  chance: 0.2
+  text: "A gas lamp gutters, all in a row, down the length of the street, as though something had drawn breath."
+  sanity_effect: -3
+  repeat: true
+
+# ------------------------------ Chapter II ------------------------------
+
+- id: chant_carries
+  rooms: [french_quarter, dockside_tavern]
+  chance: 0.3
+  text: "Somewhere close, in a language that isn't French, someone begins to sing. The tavern's regulars all stop talking at exactly the same word."
+  sanity_effect: -8
+
+- id: idol_stares
+  rooms: [evidence_room]
+  chance: 0.5
+  text: "The green cloth has slipped. You did not touch it. The idol has been turned to face the door, and every one of its eyes is on you."
+  sanity_effect: -12
+
+- id: drums_in_the_dark
+  rooms: [bayou_road, cypress_swamp, cultist_clearing]
+  chance: 0.4
+  text: "A single drum, then twenty. The sound comes from all sides and from below, and stops, all at once, like a door closing."
+  sanity_effect: -10
+
+- id: swamp_lights
+  rooms: [cypress_swamp]
+  chance: 0.2
+  text: "The fireflies form, briefly, a shape in the air: a doorway, with something standing in it."
+  sanity_effect: -4
+  repeat: true
+
+- id: monolith_hum
+  rooms: [monolith]
+  chance: 0.5
+  text: "The stone begins to hum, very low, in your teeth and your ribs and the fillings of your jaw. It is not a sound. It is a summons, and it knows your name."
+  sanity_effect: -12
+
+# ------------------------------ Chapter III -----------------------------
+
+- id: northern_lights_wrong
+  rooms: [oslo_quay, oslo_street]
+  chance: 0.15
+  text: "The aurora flickers above the fjord in a pattern too regular to be weather. It seems to be counting."
+  sanity_effect: -3
+  repeat: true
+
+- id: dripping_in_the_walls
+  rooms: [johansen_house, johansen_study]
+  chance: 0.4
+  text: "Somewhere behind the plaster, water is dripping. It's a dry house, in a dry winter. The dripping is getting closer."
+  sanity_effect: -8
+
+- id: sailors_hush
+  rooms: [sailors_mission]
+  chance: 0.3
+  text: "The room goes quiet all at once. Every sailor is staring at the door, and the door is not moving."
+  sanity_effect: -6
+
+- id: harbour_swell_wrong
+  rooms: [dunedin_docks, alert_hulk]
+  chance: 0.35
+  text: "The harbour swells, once, against the wind, and every moored vessel bows in the same direction like a congregation."
+  sanity_effect: -8
+
+- id: hulk_geometry
+  rooms: [alert_hulk]
+  chance: 0.45
+  text: "You step forward and the whole deck seems to fold beneath you, the timbers bending toward a point that isn't in the room."
+  sanity_effect: -10
+
+# ------------------------------ Chapter IV ------------------------------
+
+- id: sea_vanishes
+  rooms: [black_shoal, ship_deck]
+  chance: 0.3
+  text: "You turn to look for the sloop, and there is only the shoal, and behind it the sea, and behind that, no horizon - only a plane of blank light."
+  sanity_effect: -8
+
+- id: slime_pulse
+  rooms: [slime_causeway, cyclopean_quay]
+  chance: 0.25
+  text: "The slime underfoot pulses, once, in time with something asleep far below. Your own heartbeat has started to follow it."
+  sanity_effect: -5
+  repeat: true
+
+- id: angles_shift
+  rooms: [crooked_plaza, tilted_arcade]
+  chance: 0.3
+  text: "You look back the way you came, and there is a wall there. There has never been a wall there. A moment later, there isn't."
+  sanity_effect: -10
+  repeat: true
+
+- id: bones_shift
+  rooms: [bone_gallery]
+  chance: 0.5
+  text: "In the corner of your eye, the skulls have turned. Every one of them is now facing you, and every one of them is smiling."
+  sanity_effect: -12
+
+- id: the_call
+  rooms: [temple_gate, vault_antechamber, the_vault]
+  chance: 0.5
+  text: "The dream reaches you. For a moment you are not you but something vast and patient and uninterested, and you remember, with total certainty, every one of its ten thousand years."
+  sanity_effect: -15
