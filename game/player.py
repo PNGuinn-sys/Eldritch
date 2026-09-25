@@ -25,6 +25,7 @@ class Player:
     necronomicon_read: bool = False
     regeneration_disabled: bool = False
     chapter: Optional[str] = None  # id of the chapter last announced, if the scenario has any
+    threat_explained: bool = False  # has the flee-or-hide instruction been shown this run?
 
     @property
     def sanity_tier(self) -> SanityTier:

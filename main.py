@@ -66,7 +66,14 @@ SAVES_DIR = resolve_saves_dir()
 TURN_CONSUMING_VERBS = {"go", "look", "take", "drop", "use", "rest", "examine"}
 DEFAULT_REST_AMOUNT = 15
 
-DEFAULT_PRESENCE_MANIFEST_TEXT = "\nThe air changes. You are no longer alone in this room."
+DEFAULT_PRESENCE_MANIFEST_TEXT = "The air changes. You are no longer alone in this room."
+
+THREAT_RULE = "!" * 60
+
+THREAT_INSTRUCTION = (
+    "(It's here. Your very next move must be to flee - go <direction> - "
+    "or to hide. Anything else, and it has you.)"
+)
 
 DEFAULT_EVADE_TEXT = "\nYou don't wait to see what it is. You move."
 
@@ -174,6 +181,19 @@ def announce_chapter(player: Player, room: dict, scenario) -> None:
     print("=" * 60)
     if chapter.get("intro"):
         print(f"\n{chapter['intro'].strip()}")
+
+
+def announce_threat(player: Player, threat: dict) -> None:
+    """Print the threat's arrival set apart from ordinary narration, since
+    missing it is fatal. The first time in a run it also spells out what
+    the player has to do; after that, the prose is left to speak alone."""
+    text = (threat.get("manifest_text") or DEFAULT_PRESENCE_MANIFEST_TEXT).strip()
+    print(f"\n{THREAT_RULE}")
+    print(text)
+    if not player.threat_explained:
+        player.threat_explained = True
+        print(f"\n{THREAT_INSTRUCTION}")
+    print(THREAT_RULE)
 
 
 def describe_room(player: Player, rooms: dict, scenario, rng) -> None:
@@ -485,7 +505,7 @@ def handle_command(cmd, player: Player, rooms: dict, events: list, rng, scenario
             risk_multiplier = current_room.get("risk_multiplier", 1.0) * scenario.dread_scale
             threat = scenario.threat_for(current_room)
             if advance_dread(player, rng, threat, risk_multiplier):
-                print(threat.get("manifest_text") or DEFAULT_PRESENCE_MANIFEST_TEXT)
+                announce_threat(player, threat)
 
     if player.sanity <= 0:
         print(scenario.broken_text or DEFAULT_BROKEN_TEXT)

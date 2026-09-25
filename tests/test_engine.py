@@ -1525,6 +1525,41 @@ def test_items_and_scenery_with_capitals_can_be_named_by_the_player():
     assert "A lamp." in out
 
 
+def test_threat_arrival_is_set_apart_and_explained_only_the_first_time():
+    """Playtest feedback: the manifest text read like ordinary atmosphere,
+    so a player didn't realize they had one move to flee or hide."""
+    import main as game_main
+    from game.player import Player
+
+    player = Player(location="a")
+    threat = {"manifest_text": "  Something wet climbs the stairs.  "}
+
+    _, first = _quiet(game_main.announce_threat, player, threat)
+    lines = first.strip("\n").split("\n")
+    assert lines[0] == game_main.THREAT_RULE and lines[-1] == game_main.THREAT_RULE
+    assert "Something wet climbs the stairs." in first
+    assert "flee - go <direction>" in first and "hide" in first
+    assert player.threat_explained is True
+
+    _, second = _quiet(game_main.announce_threat, player, threat)
+    assert game_main.THREAT_RULE in second and "Something wet climbs" in second
+    assert "flee - go <direction>" not in second      # no tutorial nag after the first time
+
+    fresh = Player(location="a")
+    _, default = _quiet(game_main.announce_threat, fresh, {})   # scenario with no custom text
+    assert game_main.DEFAULT_PRESENCE_MANIFEST_TEXT in default and "flee" in default
+
+
+def test_threat_instruction_survives_save_and_load():
+    from game.save_load import apply_snapshot, snapshot
+    player, rooms, events, rng = _fresh_game(MANOR_SCENARIO, seed=2)
+    player.threat_explained = True
+    saved = snapshot(MANOR_SCENARIO, rooms, events, player, rng)
+    player2, rooms2, events2, rng2 = _fresh_game(MANOR_SCENARIO, seed=3)
+    apply_snapshot(saved, MANOR_SCENARIO, rooms2, events2, player2, rng2)
+    assert player2.threat_explained is True
+
+
 # --- Whole-scenario checks: winnability & a bot that plays every scenario ------------
 
 SHIPPED_SCENARIOS = ("manor", "hollow_tide", "reanimator", "sleeper")
