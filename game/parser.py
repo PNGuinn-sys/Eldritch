@@ -26,6 +26,7 @@ VERB_ALIASES = {
     "look": "look", "l": "look",
     "examine": "examine", "x": "examine", "inspect": "examine", "read": "examine",
     "go": "go", "move": "go", "walk": "go",
+    "flee": "flee", "run": "flee", "escape": "flee",
     "take": "take", "get": "take", "grab": "take", "pick": "take", "pickup": "take",
     "drop": "drop", "discard": "drop",
     "inventory": "inventory", "inv": "inventory", "i": "inventory",
@@ -71,6 +72,14 @@ def parse(raw_input: str) -> Command:
         if rest and rest[0] in DIRECTIONS:
             return Command(verb="go", direction=DIRECTIONS[rest[0]], raw=raw_input)
         return Command(verb="go", direction=None, raw=raw_input)
+
+    # "flee north" / "run north" is just movement. A bare "flee" (or one
+    # with no recognizable direction) is a panicked bolt through whatever
+    # way is open - the game loop picks the exit.
+    if verb == "flee":
+        if rest and rest[0] in DIRECTIONS:
+            return Command(verb="go", direction=DIRECTIONS[rest[0]], raw=raw_input)
+        return Command(verb="flee", raw=raw_input)
 
     target = " ".join(rest) if rest else None
     return Command(verb=verb, target=target, raw=raw_input)

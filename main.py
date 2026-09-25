@@ -25,7 +25,7 @@ from pathlib import Path
 
 from game.content_loader import ScenarioError, discover_scenarios, load_scenario
 from game.entities import advance_dread, resolve_evasion
-from game.parser import parse
+from game.parser import Command, parse
 from game.player import Player
 from game.rng import make_rng
 from game.sanity import distort, thresholds_from_dict
@@ -71,8 +71,9 @@ DEFAULT_PRESENCE_MANIFEST_TEXT = "The air changes. You are no longer alone in th
 THREAT_RULE = "!" * 60
 
 THREAT_INSTRUCTION = (
-    "(It's here. Your very next move must be to flee - go <direction> - "
-    "or to hide. Anything else, and it has you.)"
+    "(It's here. Your very next move must be to flee - go <direction>, "
+    "or just 'flee' to bolt through any open way - or to hide. "
+    "Anything else, and it has you.)"
 )
 
 DEFAULT_EVADE_TEXT = "\nYou don't wait to see what it is. You move."
@@ -154,6 +155,19 @@ def gate_unmet(exit_info: dict, player: Player, scenario) -> bool:
     hasn't met yet."""
     needed = exit_info.get("requires_clues")
     return bool(needed) and clue_progress(player, scenario)[0] < needed
+
+
+def is_escape_route(exit_info: dict, player: Player, scenario) -> bool:
+    """Can the player flee the threat through this exit? Only through an
+    ordinary open doorway - not a locked door, an unmet knowledge gate, or
+    the win/finale exit (reaching those isn't escaping, it's the ending)."""
+    return (
+        "target" in exit_info
+        and not exit_info.get("locked")
+        and not exit_info.get("requires_all_clues")
+        and not exit_info.get("finale")
+        and not gate_unmet(exit_info, player, scenario)
+    )
 
 
 def run_finale(finale: list, player: Player, scenario) -> str:
@@ -310,14 +324,17 @@ def handle_command(cmd, player: Player, rooms: dict, events: list, rng, scenario
             print(threat.get("hide_text") or DEFAULT_HIDE_TEXT)
             return "continue"
 
+        if cmd.verb == "flee":
+            # A panicked bolt: out through any open way, chosen for you.
+            routes = [d for d, info in room["exits"].items() if is_escape_route(info, player, scenario)]
+            if routes:
+                cmd = Command(verb="go", direction=rng.choice(routes), raw=cmd.raw)
+
         can_flee = (
             cmd.verb == "go"
             and cmd.direction
             and cmd.direction in room["exits"]
-            and not room["exits"][cmd.direction].get("locked")
-            and not room["exits"][cmd.direction].get("requires_all_clues")
-            and not room["exits"][cmd.direction].get("finale")
-            and not gate_unmet(room["exits"][cmd.direction], player, scenario)
+            and is_escape_route(room["exits"][cmd.direction], player, scenario)
         )
         if can_flee:
             resolve_evasion(player)
@@ -486,10 +503,13 @@ def handle_command(cmd, player: Player, rooms: dict, events: list, rng, scenario
         else:
             print("There's nothing here that makes it feel safe to stop.")
 
+    elif cmd.verb == "flee":
+        print("There's nothing to run from. Not yet.")
+
     elif cmd.verb == "help":
         print(
             "Commands: look, examine <thing>, go <direction>, take <item>, "
-            "drop <item>, use <item>, inventory, status, hide, rest, "
+            "drop <item>, use <item>, inventory, status, hide, flee [direction], rest, "
             "save [name], load [name], quit"
         )
 

@@ -1550,6 +1550,71 @@ def test_threat_arrival_is_set_apart_and_explained_only_the_first_time():
     assert game_main.DEFAULT_PRESENCE_MANIFEST_TEXT in default and "flee" in default
 
 
+def test_parser_understands_flee_and_run():
+    for word in ("flee", "run", "escape"):
+        cmd = parse(f"{word} north")
+        assert cmd.verb == "go" and cmd.direction == "north", word
+        assert parse(word).verb == "flee", word
+        assert parse(f"{word} away").verb == "flee", word   # no recognizable direction -> a bolt
+    assert parse("run n").direction == "north"
+
+
+def test_flee_with_a_direction_escapes_like_go():
+    """Playtest find: 'flee north' used to be an unknown command, so the
+    player got caught - while the game's own instruction said to flee."""
+    for line in ("flee north", "run north", "escape n"):
+        player, rooms, events, rng = _fresh_game(MANOR_SCENARIO, seed=4)
+        player.location, player.presence_active, player.dread = "foyer", True, 3
+        outcome, _ = _quiet(__import__("main").handle_command, parse(line), player, rooms, events, rng, MANOR_SCENARIO)
+        assert outcome == "continue" and player.location == "corridor", line
+        assert player.presence_active is False and player.dread == 0, line
+
+
+def test_bare_flee_bolts_only_through_a_safe_open_exit():
+    import main as game_main
+    # The foyer's exits: 4 open doorways plus the win exit ('out'), which must never be picked.
+    open_targets = {"corridor", "drawing_room", "study", "kitchen"}
+    landed = set()
+    for seed in range(60):
+        player, rooms, events, rng = _fresh_game(MANOR_SCENARIO, seed=seed)
+        player.location, player.presence_active, player.dread = "foyer", True, 3
+        outcome, _ = _quiet(game_main.handle_command, parse("flee"), player, rooms, events, rng, MANOR_SCENARIO)
+        assert outcome == "continue" and player.presence_active is False, seed
+        landed.add(player.location)
+    assert landed <= open_targets and len(landed) > 1   # random, and never the win exit
+
+    # Locked doors and unmet knowledge gates aren't escape routes either.
+    sleeper = load_scenario(PROJECT_ROOT / "data" / "sleeper")
+    for seed in range(30):
+        player, rooms, events, rng = _fresh_game(sleeper, seed=seed)
+        player.location, player.presence_active = "providence_station", True   # south is gated at 4 clues
+        _quiet(game_main.handle_command, parse("flee"), player, rooms, events, rng, sleeper)
+        assert player.location == "thomas_street", seed
+        player, rooms, events, rng = _fresh_game(sleeper, seed=seed)
+        player.location, player.presence_active = "angell_study", True         # 'in' is a locked cabinet
+        _quiet(game_main.handle_command, parse("flee"), player, rooms, events, rng, sleeper)
+        assert player.location == "angell_hall", seed
+
+
+def test_bare_flee_with_no_way_out_is_caught_and_outside_an_encounter_does_nothing():
+    import main as game_main
+    from game.player import Player
+
+    scenario = Scenario(name="t", title="t", description="", start_room="a", rooms={}, items={}, events=[])
+    rooms = {"a": {"name": "A", "description": "d", "items": [], "exits": {
+        "north": {"target": "b", "locked": True, "unlock_item": "k"}}},
+        "b": {"name": "B", "description": "d", "items": [], "exits": {}}}
+    player = Player(location="a")
+    player.presence_active = True
+    outcome, _ = _quiet(game_main.handle_command, parse("flee"), player, rooms, [], _NoDread(), scenario)
+    assert outcome == "caught"          # nowhere to run - hiding was the only option
+
+    calm = Player(location="a")
+    outcome, out = _quiet(game_main.handle_command, parse("flee"), calm, rooms, [], _AlwaysDread(), scenario)
+    assert outcome == "continue" and calm.location == "a" and "nothing to run from" in out
+    assert calm.dread == 0              # not an action: takes no turn, builds no dread
+
+
 def test_threat_instruction_survives_save_and_load():
     from game.save_load import apply_snapshot, snapshot
     player, rooms, events, rng = _fresh_game(MANOR_SCENARIO, seed=2)

@@ -334,7 +334,8 @@ separate step, e.g. `gh release create v0.3.0 dist\Eldritch-0.3.0-windows.zip --
 | `use <item>`                  | Use an item (e.g. a key on a locked door, or a curative) |
 | `inventory` / `i`               | List carried items                        |
 | `status` / `stats`                | Location, sanity, inventory, clue & room progress |
-| `hide` / `wait`                     | Evade the threat when it manifests        |
+| `hide` / `wait`                     | Evade the threat when it manifests (stay put) |
+| `flee [direction]` / `run`          | Evade by fleeing; a bare `flee` bolts through a random open exit |
 | `rest` / `recover`                    | Recover sanity, in a room marked safe     |
 | `save [name]` / `load [name]`         | Save or restore your game (default slot `quicksave`); takes no turn |
 | `quit`                                  | Exit the game                         |
